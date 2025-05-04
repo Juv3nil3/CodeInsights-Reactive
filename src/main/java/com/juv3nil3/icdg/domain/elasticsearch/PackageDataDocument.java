@@ -1,13 +1,25 @@
 package com.juv3nil3.icdg.domain.elasticsearch;
 
+import lombok.Builder;
+
 import java.util.List;
 
+@Builder
 public class PackageDataDocument {
 
     private String packageName;
-    private List<ClassDataDocument> classes;
+    private List<FileDataDocument> files;
+
+    public PackageDataDocument() {
+    }
+
+    public PackageDataDocument(String packageName, List<FileDataDocument> files) {
+        this.packageName = packageName;
+        this.files = files;
+    }
 
     // Getters and Setters
+
 
     public String getPackageName() {
         return packageName;
@@ -17,11 +29,11 @@ public class PackageDataDocument {
         this.packageName = packageName;
     }
 
-    public List<ClassDataDocument> getClasses() {
-        return classes;
+    public List<FileDataDocument> getFiles() {
+        return files;
     }
 
-    public void setClasses(List<ClassDataDocument> classes) {
-        this.classes = classes;
+    public void setFiles(List<FileDataDocument> files) {
+        this.files = files;
     }
 }

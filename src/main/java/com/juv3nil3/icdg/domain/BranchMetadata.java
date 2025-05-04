@@ -23,5 +23,57 @@ public class BranchMetadata {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
+    }
+
+    public String getLatestCommitHash() {
+        return latestCommitHash;
+    }
+
+    public void setLatestCommitHash(String latestCommitHash) {
+        this.latestCommitHash = latestCommitHash;
+    }
+
+    public RepositoryMetadata getRepositoryMetadata() {
+        return repositoryMetadata;
+    }
+
+    public void setRepositoryMetadata(RepositoryMetadata repositoryMetadata) {
+        this.repositoryMetadata = repositoryMetadata;
+    }
+
+    public Documentation getDocumentation() {
+        return documentation;
+    }
+
+    public void setDocumentation(Documentation documentation) {
+        this.documentation = documentation;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
 

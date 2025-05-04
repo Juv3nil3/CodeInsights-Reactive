@@ -1,7 +1,10 @@
 package com.juv3nil3.icdg.domain.elasticsearch;
 
+import lombok.Builder;
+
 import java.util.List;
 
+@Builder
 public class ClassDataDocument {
 
     private String className;
@@ -9,6 +12,7 @@ public class ClassDataDocument {
     private String superClassName;
     private List<String> interfaces;
     private List<MethodDataDocument> methods;
+    private String comment;
 
     // Getters and Setters
 
@@ -50,5 +54,13 @@ public class ClassDataDocument {
 
     public void setMethods(List<MethodDataDocument> methods) {
         this.methods = methods;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

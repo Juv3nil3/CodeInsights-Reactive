@@ -1,5 +1,6 @@
 package com.juv3nil3.icdg.domain.elasticsearch;
 
+import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 
@@ -7,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Document(indexName = "documentation")
+@Builder
 public class DocumentationDocument {
 
     @Id

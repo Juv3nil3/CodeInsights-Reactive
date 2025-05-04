@@ -13,9 +13,10 @@ public class Documentation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "branch_metadata_id")
     private BranchMetadata branchMetadata;
+
     private String exportPath; // Path where documentation is exported
     private LocalDateTime createdAt; // Timestamp when the documentation was created
     private LocalDateTime updatedAt; // Timestamp when the documentation was last updated
@@ -37,6 +38,10 @@ public class Documentation {
 
     public void setBranchMetadata(BranchMetadata branchMetadata) {
         this.branchMetadata = branchMetadata;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getExportPath() {
@@ -70,5 +75,6 @@ public class Documentation {
     public void setPackages(List<PackageData> packages) {
         this.packages = packages;
     }
+
 }
 

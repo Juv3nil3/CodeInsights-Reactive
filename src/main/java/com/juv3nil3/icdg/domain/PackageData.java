@@ -1,6 +1,6 @@
 package com.juv3nil3.icdg.domain;
 
-;
+import com.juv3nil3.icdg.domain.elasticsearch.ClassDataDocument;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
