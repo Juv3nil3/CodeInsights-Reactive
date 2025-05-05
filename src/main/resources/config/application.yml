@@ -145,6 +145,10 @@ spring:
     ansi:
       console-available: true
 
+keycloak:
+  github:
+    token-url: http://localhost:9083/realms/jhipster/broker/github/token
+
 server:
   servlet:
     session:
