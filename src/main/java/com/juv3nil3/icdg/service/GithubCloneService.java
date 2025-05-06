@@ -17,7 +17,7 @@ public class GithubCloneService {
 
     private static final Logger log = LoggerFactory.getLogger(GithubCloneService.class);
 
-    public Mono<Path> cloneRepository(String owner, String repo, String token) {
+    public Mono<Path> cloneRepository(String owner, String repo, String branch, String token) {
         return Mono.fromCallable(() -> {
             Path tempDir = Files.createTempDirectory("repo-clone-");
 
@@ -25,13 +25,14 @@ public class GithubCloneService {
             UsernamePasswordCredentialsProvider credentials =
                     token != null ? new UsernamePasswordCredentialsProvider(token, "") : null;
 
-            Git.cloneRepository()
+            Git cloned = Git.cloneRepository()
                     .setURI(uri)
                     .setDirectory(tempDir.toFile())
                     .setCredentialsProvider(credentials)
+                    .setBranch("refs/heads/" + branch) // Ensure branch is checked out
                     .call();
 
-            log.info("Cloned {} into {}", uri, tempDir);
+            log.info("Cloned {} (branch: {}) into {}", uri, branch, tempDir);
             return tempDir;
         }).subscribeOn(Schedulers.boundedElastic());
     }

@@ -24,6 +24,8 @@ public class FileData {
     @JoinColumn(name = "package_id")
     private PackageData packageData;
 
+    private String contentHash;
+
     // Helper methods for managing the bidirectional relationship
     public void addClass(ClassData classData) {
         classes.add(classData);

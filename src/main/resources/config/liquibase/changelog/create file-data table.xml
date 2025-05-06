@@ -12,6 +12,7 @@
             <column name="repo_name" type="VARCHAR(255)"/>
             <column name="file_path" type="VARCHAR(255)"/>
             <column name="package_id" type="BIGINT"/>
+            <column name="content_hash" type="VARCHAR(255)"/>
         </createTable>
 
         <addForeignKeyConstraint baseTableName="file_data"
