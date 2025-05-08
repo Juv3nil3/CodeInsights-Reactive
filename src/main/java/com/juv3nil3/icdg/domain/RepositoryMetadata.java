@@ -16,7 +16,6 @@ public class RepositoryMetadata {
     private String owner; // Owner of the repository
     private String repoName; // Name of the repository
     private String description; // Description of the repository
-    private String latestCommitHash; // Latest commit hash
     private String defaultBranch; // Default branch (e.g., "main" or "master")
 
     private LocalDateTime createdAt; // Timestamp when the metadata was created
@@ -29,11 +28,10 @@ public class RepositoryMetadata {
 
     public RepositoryMetadata() {}
 
-    public RepositoryMetadata(String owner, String repoName, String description, String latestCommitHash, String defaultBranch) {
+    public RepositoryMetadata(String owner, String repoName, String description, String defaultBranch) {
         this.owner = owner;
         this.repoName = repoName;
         this.description = description;
-        this.latestCommitHash = latestCommitHash;
         this.defaultBranch = defaultBranch;
     }
 
@@ -69,14 +67,6 @@ public class RepositoryMetadata {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getLatestCommitHash() {
-        return latestCommitHash;
-    }
-
-    public void setLatestCommitHash(String latestCommitHash) {
-        this.latestCommitHash = latestCommitHash;
     }
 
     public String getDefaultBranch() {

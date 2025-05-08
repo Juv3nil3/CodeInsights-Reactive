@@ -5,6 +5,7 @@ import com.juv3nil3.icdg.domain.BranchMetadata;
 import com.juv3nil3.icdg.domain.RepositoryMetadata;
 import com.juv3nil3.icdg.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,7 +26,7 @@ public class StructureParserService {
     private final ClassDataRepository classRepository;
     private final FieldDataRepository fieldRepository;
     private final MethodDataRepository methodRepository;
-    private final JavaFileParserService javaFileParserService;
+    private final JavaFileParser javaFileParserService;
 
     public Mono<Void> parseRepositoryStructure(Path repoPath, String owner, String repoName, String branchName) {
         RepositoryMetadata repo = new RepositoryMetadata(owner, repoName, LocalDateTime.now(), LocalDateTime.now());

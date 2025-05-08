@@ -21,7 +21,7 @@ public class DomainPersistenceTest {
 
     @Test
     void testDomainEntityPersistence() {
-        RepositoryMetadata repo = new RepositoryMetadata("juv3nil3", "icdg", "Test Repo", "abcd123", "main");
+        RepositoryMetadata repo = new RepositoryMetadata("juv3nil3", "icdg", , "main");
         repoRepo.save(repo);
 
         BranchMetadata branch = new BranchMetadata();
