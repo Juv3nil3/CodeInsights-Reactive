@@ -19,4 +19,5 @@ public interface BranchFileAssociationRepository extends R2dbcRepository<BranchF
     Flux<BranchFileAssociation> findAllByPackageData(PackageData packageData);
 
     Flux<BranchFileAssociation> findAllByBranchAndPackageData(BranchMetadata branch, PackageData packageData);
+
 }

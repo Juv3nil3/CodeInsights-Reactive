@@ -88,12 +88,11 @@ public class StructureParserService {
             String relativePath = repoRoot.relativize(path).toString();
             String contentHash = DigestUtils.sha256Hex(content);
 
-            return fileRepository.findByRepoNameAndFilePathAndSha256(repoName, relativePath, contentHash)
+            return fileRepository.findByRepoNameAndContentHash(repoName, contentHash)
                     .switchIfEmpty(
                             javaFileParserService.parseJavaFile(content)
                                     .flatMap(parsedFile -> {
                                         parsedFile.setRepoName(repoName);
-                                        parsedFile.setFilePath(relativePath);
                                         parsedFile.setSha256(contentHash);
                                         return saveFileData(parsedFile);
                                     })
