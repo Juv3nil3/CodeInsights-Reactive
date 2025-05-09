@@ -11,6 +11,9 @@ public class BranchFileAssociation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String repoName;
+    private String filePath; // Full path including the file name
+
     @ManyToOne(fetch = FetchType.LAZY)
     private BranchMetadata branch;
 

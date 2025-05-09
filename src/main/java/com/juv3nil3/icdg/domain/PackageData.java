@@ -13,7 +13,7 @@ public class PackageData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String packageName; // Fully qualified package name
 
     private String repoName;
@@ -25,8 +25,12 @@ public class PackageData {
     @OneToMany(mappedBy = "parentPackage", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PackageData> subPackages = new ArrayList<>(); // Sub-packages of this package
 
-    @OneToMany(mappedBy = "packageData", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<FileData> files = new ArrayList<>();
+    @OneToMany(mappedBy = "packageData")
+    private List<BranchFileAssociation> fileAssociations;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private BranchMetadata branch;
+
 
     public PackageData() {}
 
@@ -59,17 +63,12 @@ public class PackageData {
         this.repoName = repoName;
     }
 
-    public List<FileData> getFiles() {
-        return files;
+    public List<BranchFileAssociation> getFileAssociations() {
+        return fileAssociations;
     }
 
-    public void setFiles(List<FileData> files) {
-        this.files = files;
-    }
-
-    public void addFile(FileData fileData) {
-        this.files.add(fileData);
-        fileData.setPackageData(this);
+    public void setFileAssociations(List<BranchFileAssociation> fileAssociations) {
+        this.fileAssociations = fileAssociations;
     }
 
     public PackageData getParentPackage() {
