@@ -1,11 +1,12 @@
 package com.juv3nil3.icdg.service;
 
 
-import com.juv3nil3.icdg.domain.BranchMetadata;
-import com.juv3nil3.icdg.domain.RepositoryMetadata;
+import com.juv3nil3.icdg.domain.*;
 import com.juv3nil3.icdg.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -14,6 +15,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,8 @@ public class StructureParserService {
     private final FieldDataRepository fieldRepository;
     private final MethodDataRepository methodRepository;
     private final JavaFileParser javaFileParserService;
+
+    private static final Logger log = LoggerFactory.getLogger(StructureParserService.class);
 
     public Mono<Void> parseRepositoryStructure(Path repoPath, String owner, String repoName, String branchName) {
         RepositoryMetadata repo = new RepositoryMetadata(owner, repoName, LocalDateTime.now(), LocalDateTime.now());
