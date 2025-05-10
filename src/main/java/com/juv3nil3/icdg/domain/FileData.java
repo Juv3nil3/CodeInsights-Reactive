@@ -64,6 +64,14 @@ public class FileData {
         this.filePath = filePath;
     }
 
+    public String getContentHash() {
+        return contentHash;
+    }
+
+    public void setContentHash(String contentHash) {
+        this.contentHash = contentHash;
+    }
+
     public List<ClassData> getClasses() {
         return classes;
     }

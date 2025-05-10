@@ -13,6 +13,7 @@ import com.juv3nil3.icdg.domain.FieldData;
 import com.juv3nil3.icdg.domain.FileData;
 import com.juv3nil3.icdg.domain.MethodData;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -27,31 +28,31 @@ public class JavaFileParser {
     /** Parses a Java file's input stream using JavaParser and returns a FileData populated
      * with ClassData (which includes fields and methods).
      **/
-    public FileData parseJavaFile(InputStream inputStream) throws Exception {
-        // Log start
-        System.out.println("Starting Java file parsing...");
+    public Mono<FileData> parseJavaFile(InputStream inputStream) {
+        return Mono.fromCallable(() -> {
+            System.out.println("Starting Java file parsing...");
 
-        // Initialize FileData; ideally, also set the file path externally
-        FileData fileData = new FileData();
+            FileData fileData = new FileData();
 
-        try {
-            // Parse using JavaParser
-            CompilationUnit compilationUnit = parseCompilationUnit(inputStream);
-            // Extract package if available (set externally)
-            Optional<PackageDeclaration> pkgDecl = compilationUnit.getPackageDeclaration();
-            pkgDecl.ifPresent(pd -> fileData.setRepoName(pd.getNameAsString()));
+            try {
+                CompilationUnit compilationUnit = parseCompilationUnit(inputStream);
 
-            // Extract classes and populate FileData
-            extractClassData(compilationUnit, fileData);
+                Optional<PackageDeclaration> pkgDecl = compilationUnit.getPackageDeclaration();
+                pkgDecl.ifPresent(pd -> fileData.setRepoName(pd.getNameAsString()));
 
-        } catch (Exception e) {
-            System.err.println("Error during Java file parsing: " + e.getMessage());
-            throw e;
-        }
+                extractClassData(compilationUnit, fileData);
 
-        System.out.println("Java file parsing completed.");
-        return fileData;
+                System.out.println("Java file parsing completed.");
+                return fileData;
+
+            } catch (Exception e) {
+                System.err.println("Error during Java file parsing: " + e.getMessage());
+                throw new RuntimeException("Parsing failed", e);
+            }
+
+        });
     }
+
 
     private CompilationUnit parseCompilationUnit(InputStream inputStream) throws Exception {
         JavaParser parser = new JavaParser();

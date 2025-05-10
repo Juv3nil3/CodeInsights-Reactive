@@ -112,7 +112,7 @@ public class StructureParserService {
                                     .flatMap(parsedFile -> {
                                         parsedFile.setRepoName(repoName);
                                         parsedFile.setFilePath(relativePath);
-                                        parsedFile.setSha256(contentHash);
+                                        parsedFile.setContentHash(contentHash);
                                         return saveFileData(parsedFile);
                                     })
                     )
