@@ -71,6 +71,14 @@ public class PackageData {
         this.fileAssociations = fileAssociations;
     }
 
+    public BranchMetadata getBranch() {
+        return branch;
+    }
+
+    public void setBranch(BranchMetadata branch) {
+        this.branch = branch;
+    }
+
     public PackageData getParentPackage() {
         return parentPackage;
     }

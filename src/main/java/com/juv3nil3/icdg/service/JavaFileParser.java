@@ -39,7 +39,7 @@ public class JavaFileParser {
             CompilationUnit compilationUnit = parseCompilationUnit(inputStream);
             // Extract package if available (set externally)
             Optional<PackageDeclaration> pkgDecl = compilationUnit.getPackageDeclaration();
-            pkgDecl.ifPresent(pd -> fileData.setName(pd.getNameAsString()));
+            pkgDecl.ifPresent(pd -> fileData.setRepoName(pd.getNameAsString()));
 
             // Extract classes and populate FileData
             extractClassData(compilationUnit, fileData);

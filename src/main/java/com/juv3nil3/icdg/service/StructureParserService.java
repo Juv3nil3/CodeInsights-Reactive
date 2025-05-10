@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -82,41 +84,66 @@ public class StructureParserService {
                 });
     }
 
-    private Mono<Void> parseAndSaveFile(Path path, Path repoRoot, String repoName, RepositoryMetadata repo, BranchMetadata branch) {
+    private Mono<Void> parseAndSaveFile(Path path, Path repoRoot, String repoName,
+                                        RepositoryMetadata repo, BranchMetadata branch) {
         try {
-            String content = Files.readString(path);
+            InputStream fileStream = Files.newInputStream(path);
+            byte[] fileBytes = fileStream.readAllBytes(); // Read into byte array to use multiple times
+            fileStream.close();
+
+            String contentHash = DigestUtils.sha256Hex(fileBytes);
             String relativePath = repoRoot.relativize(path).toString();
-            String contentHash = DigestUtils.sha256Hex(content);
 
             return fileRepository.findByRepoNameAndContentHash(repoName, contentHash)
+                    .flatMap(existingFile -> {
+                        if (!existingFile.getFilePath().equals(relativePath)) {
+                            return branchFileAssociationRepository.findByBranchAndFile(branch, existingFile)
+                                    .flatMap(branchFileAssociationRepository::delete)
+                                    .then(Mono.defer(() -> {
+                                        existingFile.setFilePath(relativePath);
+                                        return fileRepository.save(existingFile);
+                                    }));
+                        } else {
+                            return Mono.just(existingFile);
+                        }
+                    })
                     .switchIfEmpty(
-                            javaFileParserService.parseJavaFile(content)
+                            javaFileParserService.parseJavaFile(new ByteArrayInputStream(fileBytes))
                                     .flatMap(parsedFile -> {
                                         parsedFile.setRepoName(repoName);
+                                        parsedFile.setFilePath(relativePath);
                                         parsedFile.setSha256(contentHash);
                                         return saveFileData(parsedFile);
                                     })
                     )
-                    .flatMap(file -> getOrCreatePackage(extractPackageName(content), repo, branch)
-                            .flatMap(pkg -> branchFileAssociationRepository.findByBranchAndFile(branch, file)
-                                    .switchIfEmpty(Mono.defer(() -> {
-                                        BranchFileAssociation assoc = new BranchFileAssociation();
-                                        assoc.setBranch(branch);
-                                        assoc.setFile(file);
-                                        assoc.setPackageData(pkg);
-                                        return branchFileAssociationRepository.save(assoc);
-                                    }))
-                                    .then()
-                            )
-                    );
+                    .flatMap(file -> {
+                        String contentString = new String(fileBytes); // For extractPackageName
+                        return getOrCreatePackage(extractPackageName(contentString), repo, branch)
+                                .flatMap(pkg ->
+                                        branchFileAssociationRepository.findByBranchAndFile(branch, file)
+                                                .switchIfEmpty(Mono.defer(() -> {
+                                                    BranchFileAssociation assoc = new BranchFileAssociation();
+                                                    assoc.setRepoName(repoName);
+                                                    assoc.setBranch(branch);
+                                                    assoc.setFile(file);
+                                                    assoc.setPackageData(pkg);
+                                                    assoc.setFilePath(relativePath);
+                                                    return branchFileAssociationRepository.save(assoc);
+                                                }))
+                                                .then()
+                                );
+                    });
 
         } catch (IOException e) {
             return Mono.error(new RuntimeException("Failed to read file: " + path, e));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
+
     private Mono<FileData> saveFileData(FileData fileData) {
-        log.info("Saving FileData: {}", fileData.getFilePath());
+        log.info("Saving FileData");
 
         return fileRepository.save(fileData)
                 .doOnNext(savedFile -> log.info("FileData saved: {}", savedFile.getId()))
@@ -174,7 +201,6 @@ public class StructureParserService {
                         newPkg.setPackageName(effectiveName);
                         newPkg.setRepoName(repo.getRepoName());
                         newPkg.setBranch(branch);
-                        newPkg.setRepository(repo);
                         newPkg.setParentPackage(parentPkg);
                         return packageRepository.save(newPkg);
                     });

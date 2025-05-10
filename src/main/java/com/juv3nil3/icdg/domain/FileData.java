@@ -15,6 +15,7 @@ public class FileData {
 
     private String fileName;
     private String repoName;
+    private String filePath; // Full path including the file name
 
     @OneToMany(mappedBy = "fileData", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
     private List<ClassData> classes = new ArrayList<>();
@@ -55,6 +56,14 @@ public class FileData {
         this.repoName = repoName;
     }
 
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
     public List<ClassData> getClasses() {
         return classes;
     }
@@ -69,6 +78,7 @@ public class FileData {
                 "id=" + id +
                 ", fileName='" + fileName + '\'' +
                 ", repoName='" + repoName + '\'' +
+                ", filePath='" + filePath + '\'' +
                 ", numberOfClasses=" + (classes != null ? classes.size() : 0) +
                 '}';
     }
