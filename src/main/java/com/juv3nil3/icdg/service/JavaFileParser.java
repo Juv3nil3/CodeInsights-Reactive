@@ -4,7 +4,6 @@ package com.juv3nil3.icdg.service;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -36,9 +35,6 @@ public class JavaFileParser {
 
             try {
                 CompilationUnit compilationUnit = parseCompilationUnit(inputStream);
-
-                Optional<PackageDeclaration> pkgDecl = compilationUnit.getPackageDeclaration();
-                pkgDecl.ifPresent(pd -> fileData.setRepoName(pd.getNameAsString()));
 
                 extractClassData(compilationUnit, fileData);
 

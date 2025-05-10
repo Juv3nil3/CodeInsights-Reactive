@@ -44,10 +44,16 @@ public class StructureParserService {
                 .flatMap(repo ->
                         createOrUpdateBranchMetadata(repo, branchName)
                                 .flatMap(branch ->
-                                        Flux.fromStream(Files.walk(repoPath))
-                                                .filter(path -> path.toString().endsWith(".java"))
-                                                .flatMap(path -> parseAndSaveFile(path, repoPath, repo.getRepoName(), repo, branch))
-                                                .then()
+                                        {
+                                            try {
+                                                return Flux.fromStream(Files.walk(repoPath))
+                                                        .filter(path -> path.toString().endsWith(".java"))
+                                                        .flatMap(path -> parseAndSaveFile(path, repoPath, repo.getRepoName(), repo, branch))
+                                                        .then();
+                                            } catch (IOException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                        }
                                 )
                 );
     }
