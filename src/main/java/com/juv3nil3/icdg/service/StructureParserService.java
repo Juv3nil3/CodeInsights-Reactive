@@ -40,23 +40,25 @@ public class StructureParserService {
     private static final Logger log = LoggerFactory.getLogger(StructureParserService.class);
 
     public Mono<Void> parseRepositoryStructure(Path repoPath, String owner, String repoName, String branchName) {
-        return createOrUpdateRepositoryMetadata(owner, repoName)
-                .flatMap(repo ->
-                        createOrUpdateBranchMetadata(repo, branchName)
-                                .flatMap(branch ->
-                                        {
-                                            try {
-                                                return Flux.fromStream(Files.walk(repoPath))
-                                                        .filter(path -> path.toString().endsWith(".java"))
-                                                        .flatMap(path -> parseAndSaveFile(path, repoPath, repo.getRepoName(), repo, branch))
-                                                        .then();
-                                            } catch (IOException e) {
-                                                throw new RuntimeException(e);
-                                            }
-                                        }
+        return Mono.fromCallable(() -> GitMetadataExtractor.getLatestCommitSha(repoPath, branchName))
+                .flatMap(latestCommitSha ->
+                        createOrUpdateRepositoryMetadata(owner, repoName)
+                                .flatMap(repo ->
+                                        createOrUpdateBranchMetadata(repo, branchName, latestCommitSha)
+                                                .flatMap(branch -> {
+                                                    try {
+                                                        return Flux.fromStream(Files.walk(repoPath))
+                                                                .filter(path -> path.toString().endsWith(".java"))
+                                                                .flatMap(path -> parseAndSaveFile(path, repoPath, repo.getRepoName(), repo, branch))
+                                                                .then();
+                                                    } catch (IOException e) {
+                                                        return Mono.error(new RuntimeException("Failed to walk repo path", e));
+                                                    }
+                                                })
                                 )
                 );
     }
+
 
     public Mono<RepositoryMetadata> createOrUpdateRepositoryMetadata(String owner, String repoName) {
         return repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName)
@@ -74,21 +76,24 @@ public class StructureParserService {
                 });
     }
 
-    public Mono<BranchMetadata> createOrUpdateBranchMetadata(RepositoryMetadata repo, String branchName) {
+    public Mono<BranchMetadata> createOrUpdateBranchMetadata(RepositoryMetadata repo, String branchName, String latestCommitSha) {
         return branchMetadataRepository.findByRepositoryMetadataAndBranchName(repo, branchName)
                 .switchIfEmpty(Mono.defer(() -> {
                     BranchMetadata newBranch = new BranchMetadata();
                     newBranch.setRepositoryMetadata(repo);
                     newBranch.setBranchName(branchName);
+                    newBranch.setLatestCommitHash(latestCommitSha);
                     newBranch.setCreatedAt(LocalDateTime.now());
                     newBranch.setUpdatedAt(LocalDateTime.now());
                     return branchMetadataRepository.save(newBranch);
                 }))
                 .flatMap(existing -> {
                     existing.setUpdatedAt(LocalDateTime.now());
+                    existing.setLatestCommitHash(latestCommitSha);
                     return branchMetadataRepository.save(existing);
                 });
     }
+
 
     private Mono<Void> parseAndSaveFile(Path path, Path repoRoot, String repoName,
                                         RepositoryMetadata repo, BranchMetadata branch) {
