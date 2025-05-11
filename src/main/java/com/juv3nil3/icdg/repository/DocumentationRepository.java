@@ -6,6 +6,7 @@ import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -13,8 +14,6 @@ import java.util.Optional;
 @Repository
 public interface DocumentationRepository extends R2dbcRepository<Documentation, Long> {
 
-    Optional<Documentation> findByBranchMetadata(BranchMetadata branchMetadata);
 
-    @Query("SELECT d FROM Documentation d LEFT JOIN FETCH d.packages p WHERE d.branchMetadata = :branchMetadata")
-    Optional<Documentation> findDocumentationWithPackages(@Param("branchMetadata") BranchMetadata metadata);
+    Mono<Documentation> findByBranch(BranchMetadata branch);
 }
