@@ -7,9 +7,13 @@ import com.juv3nil3.icdg.domain.RepositoryMetadata;
 import com.juv3nil3.icdg.repository.BranchDataRepository;
 import com.juv3nil3.icdg.repository.DocumentationRepository;
 import com.juv3nil3.icdg.repository.RepositoryMetadataRepo;
+import com.juv3nil3.icdg.service.dto.DocumentationDTO;
+import com.juv3nil3.icdg.service.mapper.DocumentationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
 
 @Service
 public class DocumentationGenerationService {
@@ -26,8 +30,10 @@ public class DocumentationGenerationService {
     private  DocumentationBuilderService documentationBuilderService;
     @Autowired
     private DocumentationRepository documentationRepository;
+    @Autowired
+    private DocumentationMapper documentationMapper;
 
-    public Mono<Documentation> generateIfNecessary(String owner, String repoName, String branchName, String token) {
+    public Mono<DocumentationDTO> generateIfNecessary(String owner, String repoName, String branchName, String token) {
         return repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName)
                 .flatMap(repo ->
                         branchMetadataRepository.findByRepositoryMetadataAndBranchName(repo, branchName)
@@ -47,26 +53,32 @@ public class DocumentationGenerationService {
                 )
                 .switchIfEmpty(
                         // If repo/branch don't exist, clone -> parse -> regenerate docs
-                        gitCloneService.cloneRepository(owner, repoName, branchName,token)
-                                .flatMap(clonePath -> structureParserService.parseRepositoryStructure(clonePath, owner, repoName, branchName)
-                                        .then(repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName))
-                                        .flatMap(repo -> branchMetadataRepository.findByRepositoryMetadataAndBranchName(repo, branchName))
-                                        .flatMap(branch -> regenerateDocumentation(repo, branch))
+                        gitCloneService.cloneRepository(owner, repoName, branchName, token)
+                                .flatMap(clonePath ->
+                                        structureParserService.parseRepositoryStructure(clonePath, owner, repoName, branchName)
+                                                .then(repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName))
+                                                .flatMap(repo ->
+                                                        branchMetadataRepository.findByRepositoryMetadataAndBranchName(repo, branchName)
+                                                                .flatMap(branch -> regenerateDocumentation(repo, branch))
+                                                )
                                 )
-                );
+                )
+                .map(documentationMapper::toDto); // Map to DTO at the end
     }
 
     private Mono<Documentation> regenerateDocumentation(RepositoryMetadata repo, BranchMetadata branch) {
         return documentationRepository.findByBranch(branch)
                 .defaultIfEmpty(new Documentation())
-                .flatMap(existingDoc -> documentationBuilderService.buildDocumentation(repo, branch)
-                        .flatMap(generatedDoc -> {
-                            generatedDoc.setId(existingDoc.getId()); // retain ID if exists
-                            generatedDoc.setBranch(branch);
-                            generatedDoc.setCreatedAt(existingDoc.getCreatedAt() != null ? existingDoc.getCreatedAt() : LocalDateTime.now());
-                            generatedDoc.setUpdatedAt(LocalDateTime.now());
-                            return documentationRepository.save(generatedDoc);
-                        })
+                .flatMap(existingDoc ->
+                        documentationBuilderService.buildDocumentation(repo, branch)
+                                .flatMap(generatedDoc -> {
+                                    //generatedDoc.setId(existingDoc.getId()); // for update
+                                    generatedDoc.setCreatedAt(existingDoc.getCreatedAt() != null
+                                            ? existingDoc.getCreatedAt()
+                                            : LocalDateTime.now());
+                                    generatedDoc.setUpdatedAt(LocalDateTime.now());
+                                    return documentationRepository.save(generatedDoc);
+                                })
                 );
     }
 }
