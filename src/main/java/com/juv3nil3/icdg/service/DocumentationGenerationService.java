@@ -38,7 +38,7 @@ public class DocumentationGenerationService {
                 .flatMap(repo ->
                         branchMetadataRepository.findByRepositoryMetadataAndBranchName(repo, branchName)
                                 .flatMap(branch ->
-                                        documentationRepository.findByBranch(branch)
+                                        documentationRepository.findByBranchMetadata(branch)
                                                 .flatMap(existingDoc -> {
                                                     if (!existingDoc.getUpdatedAt().isBefore(branch.getUpdatedAt())) {
                                                         // Up-to-date
@@ -67,7 +67,7 @@ public class DocumentationGenerationService {
     }
 
     private Mono<Documentation> regenerateDocumentation(RepositoryMetadata repo, BranchMetadata branch) {
-        return documentationRepository.findByBranch(branch)
+        return documentationRepository.findByBranchMetadata(branch)
                 .defaultIfEmpty(new Documentation())
                 .flatMap(existingDoc ->
                         documentationBuilderService.buildDocumentation(repo, branch)
