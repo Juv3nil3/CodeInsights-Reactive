@@ -6,6 +6,7 @@ import com.juv3nil3.icdg.domain.PackageData;
 import com.juv3nil3.icdg.domain.RepositoryMetadata;
 import com.juv3nil3.icdg.repository.DocumentationRepository;
 import com.juv3nil3.icdg.repository.PackageDataRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -19,6 +20,7 @@ public class DocumentationBuilderService {
     private final DocumentationRepository documentationRepository;
     private final PackageDataRepository packageDataRepository;
 
+    @Autowired
     public DocumentationBuilderService(DocumentationRepository documentationRepository, PackageDataRepository packageDataRepository) {
         this.documentationRepository = documentationRepository;
         this.packageDataRepository = packageDataRepository;

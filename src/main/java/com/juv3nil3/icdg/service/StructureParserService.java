@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -23,7 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class StructureParserService {
 
@@ -36,6 +36,19 @@ public class StructureParserService {
     private final MethodDataRepository methodRepository;
     private final JavaFileParser javaFileParserService;
     private final BranchFileAssociationRepository branchFileAssociationRepository;
+
+    @Autowired
+    public StructureParserService(RepositoryMetadataRepo repositoryMetadataRepository, BranchDataRepository branchMetadataRepository, PackageDataRepository packageRepository, FileDataRepository fileRepository, ClassDataRepository classRepository, FieldDataRepository fieldRepository, MethodDataRepository methodRepository, JavaFileParser javaFileParserService, BranchFileAssociationRepository branchFileAssociationRepository) {
+        this.repositoryMetadataRepository = repositoryMetadataRepository;
+        this.branchMetadataRepository = branchMetadataRepository;
+        this.packageRepository = packageRepository;
+        this.fileRepository = fileRepository;
+        this.classRepository = classRepository;
+        this.fieldRepository = fieldRepository;
+        this.methodRepository = methodRepository;
+        this.javaFileParserService = javaFileParserService;
+        this.branchFileAssociationRepository = branchFileAssociationRepository;
+    }
 
     private static final Logger log = LoggerFactory.getLogger(StructureParserService.class);
 
