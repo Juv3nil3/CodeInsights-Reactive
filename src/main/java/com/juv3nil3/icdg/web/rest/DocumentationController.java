@@ -24,11 +24,11 @@ public class DocumentationController {
         this.githubTokenService = githubTokenService;
     }
 
-    @GetMapping(value = "/{owner}/{repoName}/{branchName}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping("/generate")
     public Mono<DocumentationDTO> generateDocumentation(
-            @PathVariable String owner,
-            @PathVariable String repoName,
-            @PathVariable String branchName,
+            @RequestParam String owner,
+            @RequestParam String repoName,
+            @RequestParam String branchName,
             @RequestHeader(name = "Authorization") String authorizationHeader
     ) {
         return githubTokenService.fetchGithubTokenFromKeycloak(authorizationHeader)
