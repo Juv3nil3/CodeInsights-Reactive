@@ -9,20 +9,17 @@ import java.util.List;
 public class MethodData {
 
         @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id;
 
         private String name;
         private String comment;
+        private Long classDataId;
 
-        @ElementCollection
-        @CollectionTable(name = "method_data_annotations", joinColumns = @JoinColumn(name = "method_data_id"))
-        @Column(name = "annotation")
-        private List<String> annotations = new ArrayList<>();
-
-        @ManyToOne
-        @JoinColumn(name = "class_id")
+        @Transient
         private ClassData classData;
+
+        @Transient
+        private List<AnnotationData> annotations = new ArrayList<>();
 
         public Long getId() {
                 return id;

@@ -10,7 +10,6 @@ import java.util.List;
 public class RepositoryMetadata {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String owner; // Owner of the repository
@@ -21,7 +20,7 @@ public class RepositoryMetadata {
     private LocalDateTime createdAt; // Timestamp when the metadata was created
     private LocalDateTime updatedAt; // Timestamp when the metadata was last updated
 
-    @OneToMany(mappedBy = "repositoryMetadata", cascade = CascadeType.ALL)
+    @Transient
     private List<BranchMetadata> branches = new ArrayList<>();
 
     // Constructors, Getters, and Setters

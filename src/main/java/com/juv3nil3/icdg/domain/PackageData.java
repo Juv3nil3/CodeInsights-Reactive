@@ -10,25 +10,26 @@ import java.util.List;
 public class PackageData {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String packageName; // Fully qualified package name
+    private String packageName;
 
     private String repoName;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "parent_package_id")
-    private PackageData parentPackage; // Reference to the parent package (null for top-level)
+    private Long parentPackageId;
+    private Long branchId;
 
-    @OneToMany(mappedBy = "parentPackage", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<PackageData> subPackages = new ArrayList<>(); // Sub-packages of this package
+    @Transient
+    private PackageData parentPackage;
 
-    @OneToMany(mappedBy = "packageData")
-    private List<BranchFileAssociation> fileAssociations;
+    @Transient
+    private List<PackageData> subPackages = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Transient
+    private List<BranchFileAssociation> fileAssociations = new ArrayList<>();
+
+    @Transient
     private BranchMetadata branch;
 
 

@@ -12,12 +12,13 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface BranchFileAssociationRepository extends R2dbcRepository<BranchFileAssociation,Long> {
 
-    Mono<BranchFileAssociation> findByBranchAndFile(BranchMetadata branch, FileData file);
-
-    Flux<BranchFileAssociation> findAllByBranch(BranchMetadata branch);
-
-    Flux<BranchFileAssociation> findAllByPackageData(PackageData packageData);
+    Mono<BranchFileAssociation> findByBranchIdAndFileId(Long branchId, Long fileId);
 
     Flux<BranchFileAssociation> findAllByBranchAndPackageData(BranchMetadata branch, PackageData packageData);
+
+    Flux<BranchFileAssociation> findAllByBranchId(Long branchId);
+    Flux<BranchFileAssociation> findAllByFileId(Long fileId);
+    Flux<BranchFileAssociation> findAllByPackageDataId(Long packageDataId);
+
 
 }

@@ -8,21 +8,21 @@ import java.time.LocalDateTime;
 public class BranchMetadata {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String branchName;
     private String latestCommitHash;
 
-    @ManyToOne
-    @JoinColumn(name = "repository_metadata_id")
-    private RepositoryMetadata repositoryMetadata;
-
-    @OneToOne(mappedBy = "branchMetadata", cascade = CascadeType.ALL)
-    private Documentation documentation;
+    private Long repositoryMetadataId;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Transient
+    private RepositoryMetadata repositoryMetadata;
+
+    @Transient
+    private Documentation documentation;
 
     public Long getId() {
         return id;

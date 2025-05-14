@@ -10,17 +10,16 @@ import java.util.List;
 public class FileData {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String fileName;
     private String repoName;
-    private String filePath; // Full path including the file name
-
-    @OneToMany(mappedBy = "fileData", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
-    private List<ClassData> classes = new ArrayList<>();
+    private String filePath;
 
     private String contentHash;
+
+    @Transient
+    private List<ClassData> classes = new ArrayList<>();
 
     // Helper methods for managing the bidirectional relationship
     public void addClass(ClassData classData) {

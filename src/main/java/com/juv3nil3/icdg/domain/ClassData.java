@@ -7,26 +7,23 @@ import java.util.List;
 @Entity
 public class ClassData{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
     private String comment;
+    private Long fileDataId;
 
-    @ElementCollection
-    @CollectionTable(name = "class_data_annotations", joinColumns = @JoinColumn(name = "class_data_id"))
-    @Column(name = "annotation")
-    private List<String> annotations = new ArrayList<>();
+    @Transient
+    private FileData fileData;
 
-    @OneToMany(mappedBy = "classData", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @Transient
     private List<MethodData> methods = new ArrayList<>();
 
-    @OneToMany(mappedBy = "classData", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.EAGER)
+    @Transient
     private List<FieldData> fields = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "file_id", nullable = false)
-    private FileData fileData;
+    @Transient
+    private List<AnnotationData> annotations = new ArrayList<>();
 
     public ClassData() {}
 
@@ -52,14 +49,6 @@ public class ClassData{
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public List<String> getAnnotations() {
-        return annotations;
-    }
-
-    public void setAnnotations(List<String> annotations) {
-        this.annotations = annotations;
     }
 
     public List<MethodData> getMethods() {

@@ -10,23 +10,18 @@ import java.util.List;
 public class Documentation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "branch_metadata_id")
+    private Long branchMetadataId;
+
+    private String exportPath;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @Transient
     private BranchMetadata branchMetadata;
 
-    private String exportPath; // Path where documentation is exported
-    private LocalDateTime createdAt; // Timestamp when the documentation was created
-    private LocalDateTime updatedAt; // Timestamp when the documentation was last updated
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "documentation_packages", // Join table name
-            joinColumns = @JoinColumn(name = "documentation_id"), // Foreign key to Documentation
-            inverseJoinColumns = @JoinColumn(name = "package_data_id")
-    )
+    @Transient
     private List<PackageData> packages = new ArrayList<>();
 
     // Getters and Setters

@@ -1,0 +1,66 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="004" author="juv3nil3">
+        <!-- Foreign keys for branch_metadata -->
+        <addForeignKeyConstraint baseTableName="branch_metadata"
+                                 baseColumnNames="repository_metadata_id"
+                                 referencedTableName="repository_metadata"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_branch_repository"/>
+
+        <!-- Foreign key for documentation -->
+        <addForeignKeyConstraint baseTableName="documentation"
+                                 baseColumnNames="branch_metadata_id"
+                                 referencedTableName="branch_metadata"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_documentation_branch"/>
+
+        <!-- Foreign key for documentation_packages -->
+        <addForeignKeyConstraint baseTableName="documentation_packages"
+                                 baseColumnNames="documentation_id"
+                                 referencedTableName="documentation"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_docpkg_documentation"/>
+
+        <addForeignKeyConstraint baseTableName="documentation_packages"
+                                 baseColumnNames="package_data_id"
+                                 referencedTableName="package_data"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_docpkg_package"/>
+
+        <!-- Foreign key for package_data -->
+        <addForeignKeyConstraint baseTableName="package_data"
+                                 baseColumnNames="parent_package_id"
+                                 referencedTableName="package_data"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_package_parent"/>
+
+        <addForeignKeyConstraint baseTableName="package_data"
+                                 baseColumnNames="branch_id"
+                                 referencedTableName="branch_metadata"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_package_branch"/>
+
+        <!-- Foreign key for branch_file_association -->
+        <addForeignKeyConstraint baseTableName="branch_file_association"
+                                 baseColumnNames="branch_id"
+                                 referencedTableName="branch_metadata"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_bfa_branch"/>
+
+        <addForeignKeyConstraint baseTableName="branch_file_association"
+                                 baseColumnNames="file_id"
+                                 referencedTableName="file_data"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_bfa_file"/>
+
+        <addForeignKeyConstraint baseTableName="branch_file_association"
+                                 baseColumnNames="package_data_id"
+                                 referencedTableName="package_data"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_bfa_package"/>
+    </changeSet>
+</databaseChangeLog>

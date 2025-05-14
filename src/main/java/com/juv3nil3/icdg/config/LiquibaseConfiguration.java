@@ -18,7 +18,7 @@ import org.springframework.util.StringUtils;
 import tech.jhipster.config.JHipsterConstants;
 import tech.jhipster.config.liquibase.AsyncSpringLiquibase;
 
-//@Configuration
+@Configuration
 public class LiquibaseConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(LiquibaseConfiguration.class);

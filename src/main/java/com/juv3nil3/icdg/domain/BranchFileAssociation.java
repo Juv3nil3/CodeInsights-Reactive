@@ -8,19 +8,22 @@ import org.springframework.data.annotation.Id;
 public class BranchFileAssociation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String repoName;
-    private String filePath; // Full path including the file name
+    private String filePath;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    private Long branchId;
+    private Long fileId;
+    private Long packageDataId;
+
+    @Transient
     private BranchMetadata branch;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Transient
     private FileData file;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Transient
     private PackageData packageData;
 
 

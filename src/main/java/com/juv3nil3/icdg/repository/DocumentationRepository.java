@@ -15,5 +15,6 @@ import java.util.Optional;
 public interface DocumentationRepository extends R2dbcRepository<Documentation, Long> {
 
 
-    Mono<Documentation> findByBranchMetadata(BranchMetadata branch);
+    Mono<Documentation> findByBranchMetadataId(Long branchMetadataId);
+
 }
