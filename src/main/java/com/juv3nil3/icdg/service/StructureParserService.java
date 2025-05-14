@@ -36,9 +36,10 @@ public class StructureParserService {
     private final MethodDataRepository methodRepository;
     private final JavaFileParser javaFileParserService;
     private final BranchFileAssociationRepository branchFileAssociationRepository;
+    private final AnnotationDataRepository annotationDataRepository;
 
     @Autowired
-    public StructureParserService(RepositoryMetadataRepo repositoryMetadataRepository, BranchDataRepository branchMetadataRepository, PackageDataRepository packageRepository, FileDataRepository fileRepository, ClassDataRepository classRepository, FieldDataRepository fieldRepository, MethodDataRepository methodRepository, JavaFileParser javaFileParserService, BranchFileAssociationRepository branchFileAssociationRepository) {
+    public StructureParserService(RepositoryMetadataRepo repositoryMetadataRepository, BranchDataRepository branchMetadataRepository, PackageDataRepository packageRepository, FileDataRepository fileRepository, ClassDataRepository classRepository, FieldDataRepository fieldRepository, MethodDataRepository methodRepository, JavaFileParser javaFileParserService, BranchFileAssociationRepository branchFileAssociationRepository, AnnotationDataRepository annotationDataRepository) {
         this.repositoryMetadataRepository = repositoryMetadataRepository;
         this.branchMetadataRepository = branchMetadataRepository;
         this.packageRepository = packageRepository;
@@ -48,6 +49,7 @@ public class StructureParserService {
         this.methodRepository = methodRepository;
         this.javaFileParserService = javaFileParserService;
         this.branchFileAssociationRepository = branchFileAssociationRepository;
+        this.annotationDataRepository = annotationDataRepository;
     }
 
     private static final Logger log = LoggerFactory.getLogger(StructureParserService.class);
@@ -57,20 +59,22 @@ public class StructureParserService {
                 .flatMap(latestCommitSha ->
                         createOrUpdateRepositoryMetadata(owner, repoName)
                                 .flatMap(repo ->
-                                        createOrUpdateBranchMetadata(repo, branchName, latestCommitSha)
-                                                .flatMap(branch -> {
-                                                    try {
-                                                        return Flux.fromStream(Files.walk(repoPath))
-                                                                .filter(path -> path.toString().endsWith(".java"))
-                                                                .flatMap(path -> parseAndSaveFile(path, repoPath, repo.getRepoName(), repo, branch))
-                                                                .then();
-                                                    } catch (IOException e) {
-                                                        return Mono.error(new RuntimeException("Failed to walk repo path", e));
+                                        branchMetadataRepository.findByBranchNameAndRepositoryMetadataId(branchName, repo.getId())
+                                                .flatMap(existingBranch -> {
+                                                    if (latestCommitSha.equals(existingBranch.getLatestCommitHash())) {
+                                                        return Mono.empty(); // Already up-to-date
                                                     }
+                                                    return updateBranchMetadata(existingBranch, latestCommitSha)
+                                                            .flatMap(branch -> parseAndWalkJavaFiles(repoPath, repo, branch));
                                                 })
+                                                .switchIfEmpty(
+                                                        createOrUpdateBranchMetadata(repo, branchName, latestCommitSha)
+                                                                .flatMap(branch -> parseAndWalkJavaFiles(repoPath, repo, branch))
+                                                )
                                 )
                 );
     }
+
 
 
     public Mono<RepositoryMetadata> createOrUpdateRepositoryMetadata(String owner, String repoName) {
@@ -89,11 +93,12 @@ public class StructureParserService {
                 });
     }
 
+
     public Mono<BranchMetadata> createOrUpdateBranchMetadata(RepositoryMetadata repo, String branchName, String latestCommitSha) {
-        return branchMetadataRepository.findByRepositoryMetadataAndBranchName(repo, branchName)
+        return branchMetadataRepository.findByBranchNameAndRepositoryMetadataId(branchName, repo.getId())
                 .switchIfEmpty(Mono.defer(() -> {
                     BranchMetadata newBranch = new BranchMetadata();
-                    newBranch.setRepositoryMetadata(repo);
+                    newBranch.setRepositoryMetadataId(repo.getId());
                     newBranch.setBranchName(branchName);
                     newBranch.setLatestCommitHash(latestCommitSha);
                     newBranch.setCreatedAt(LocalDateTime.now());
@@ -107,29 +112,48 @@ public class StructureParserService {
                 });
     }
 
+    public Mono<BranchMetadata> updateBranchMetadata(BranchMetadata branch, String latestCommitSha) {
+        branch.setUpdatedAt(LocalDateTime.now());
+        branch.setLatestCommitHash(latestCommitSha);
+        return branchMetadataRepository.save(branch);
+    }
 
-    private Mono<Void> parseAndSaveFile(Path path, Path repoRoot, String repoName,
+    private Mono<Void> parseAndWalkJavaFiles(Path repoPath, RepositoryMetadata repo, BranchMetadata branch) {
+        try {
+            return Flux.fromStream(Files.walk(repoPath))
+                    .filter(path -> path.toString().endsWith(".java"))
+                    .flatMap(path -> parseAndSaveFile(path, repoPath, repo, branch))
+                    .then();
+        } catch (IOException e) {
+            return Mono.error(new RuntimeException("Failed to walk repo path", e));
+        }
+    }
+
+
+
+
+    private Mono<Void> parseAndSaveFile(Path path, Path repoRoot,
                                         RepositoryMetadata repo, BranchMetadata branch) {
         try {
             InputStream fileStream = Files.newInputStream(path);
-            byte[] fileBytes = fileStream.readAllBytes(); // Read into byte array to use multiple times
+            byte[] fileBytes = fileStream.readAllBytes();
             fileStream.close();
 
             String contentHash = DigestUtils.sha256Hex(fileBytes);
             String relativePath = repoRoot.relativize(path).toString();
+            String repoName = repo.getRepoName();
 
             return fileRepository.findByRepoNameAndContentHash(repoName, contentHash)
                     .flatMap(existingFile -> {
                         if (!existingFile.getFilePath().equals(relativePath)) {
-                            return branchFileAssociationRepository.findByBranchAndFile(branch, existingFile)
+                            return branchFileAssociationRepository.findByBranchIdAndFileId(branch.getId(), existingFile.getId())
                                     .flatMap(branchFileAssociationRepository::delete)
                                     .then(Mono.defer(() -> {
                                         existingFile.setFilePath(relativePath);
                                         return fileRepository.save(existingFile);
                                     }));
-                        } else {
-                            return Mono.just(existingFile);
                         }
+                        return Mono.just(existingFile);
                     })
                     .switchIfEmpty(
                             javaFileParserService.parseJavaFile(new ByteArrayInputStream(fileBytes))
@@ -141,48 +165,42 @@ public class StructureParserService {
                                     })
                     )
                     .flatMap(file -> {
-                        String contentString = new String(fileBytes); // For extractPackageName
+                        String contentString = new String(fileBytes);
                         return getOrCreatePackage(extractPackageName(contentString), repo, branch)
-                                .flatMap(pkg ->
-                                        branchFileAssociationRepository.findByBranchAndFile(branch, file)
-                                                .switchIfEmpty(Mono.defer(() -> {
-                                                    BranchFileAssociation assoc = new BranchFileAssociation();
-                                                    assoc.setRepoName(repoName);
-                                                    assoc.setBranch(branch);
-                                                    assoc.setFile(file);
-                                                    assoc.setPackageData(pkg);
-                                                    assoc.setFilePath(relativePath);
-                                                    return branchFileAssociationRepository.save(assoc);
-                                                }))
-                                                .then()
-                                );
+                                .flatMap(pkg -> {
+                                    BranchFileAssociation assoc = new BranchFileAssociation();
+                                    assoc.setRepoName(repoName);
+                                    assoc.setBranchId(branch.getId());
+                                    assoc.setFileId(file.getId());
+                                    assoc.setPackageDataId(pkg.getId());
+                                    assoc.setFilePath(relativePath);
+                                    return branchFileAssociationRepository.save(assoc).then();
+                                });
                     });
 
         } catch (IOException e) {
             return Mono.error(new RuntimeException("Failed to read file: " + path, e));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
 
-    private Mono<FileData> saveFileData(FileData fileData) {
-        log.info("Saving FileData");
 
+    private Mono<FileData> saveFileData(FileData fileData) {
         return fileRepository.save(fileData)
-                .doOnNext(savedFile -> log.info("FileData saved: {}", savedFile.getId()))
-                .flatMap(savedFile -> Flux.fromIterable(fileData.getClasses())
-                        .flatMap(clazz -> saveClassData(clazz, savedFile))
-                        .then(Mono.just(savedFile))
+                .flatMap(savedFile ->
+                        Flux.fromIterable(fileData.getClasses())
+                                .flatMap(clazz -> saveClassData(clazz, savedFile))
+                                .then(Mono.just(savedFile))  // Return savedFile after processing classes
                 );
     }
 
-    private Mono<ClassData> saveClassData(ClassData clazz, FileData fileData) {
-        clazz.setFileData(fileData);
-        log.info("Saving ClassData: {}", clazz.getName());
 
+    private Mono<ClassData> saveClassData(ClassData clazz, FileData fileData) {
+        clazz.setFileDataId(fileData.getId());
         return classRepository.save(clazz)
-                .flatMap(savedClass -> Mono.when(
+                .flatMap(savedClass ->
+                        Mono.when(
+                                saveAnnotations(clazz.getAnnotations(), savedClass.getId(), null, null),
                                 saveFieldData(clazz.getFields(), savedClass),
                                 saveMethodData(clazz.getMethods(), savedClass)
                         ).thenReturn(savedClass)
@@ -191,17 +209,46 @@ public class StructureParserService {
 
     private Mono<Void> saveFieldData(List<FieldData> fields, ClassData classData) {
         return Flux.fromIterable(fields)
-                .doOnNext(field -> field.setClassData(classData))
-                .flatMap(fieldRepository::save)
+                .flatMap(field -> {
+                    field.setClassDataId(classData.getId());
+                    return fieldRepository.save(field)
+                            .flatMap(savedField ->
+                                    saveAnnotations(field.getAnnotations(), null, savedField.getId(), null)
+                            );
+                })
                 .then();
     }
 
     private Mono<Void> saveMethodData(List<MethodData> methods, ClassData classData) {
         return Flux.fromIterable(methods)
-                .doOnNext(method -> method.setClassData(classData))
-                .flatMap(methodRepository::save)
+                .flatMap(method -> {
+                    method.setClassDataId(classData.getId());
+                    return methodRepository.save(method)
+                            .flatMap(savedMethod ->
+                                    saveAnnotations(method.getAnnotations(), null, null, savedMethod.getId())
+                            );
+                })
                 .then();
     }
+
+    private Mono<Void> saveAnnotations(List<AnnotationData> annotations,
+                                       Long classId,
+                                       Long fieldId,
+                                       Long methodId) {
+        if (annotations == null || annotations.isEmpty()) {
+            return Mono.empty();
+        }
+
+        return Flux.fromIterable(annotations)
+                .doOnNext(annotation -> {
+                    annotation.setClassDataId(classId);
+                    annotation.setFieldDataId(fieldId);
+                    annotation.setMethodDataId(methodId);
+                })
+                .flatMap(annotationDataRepository::save)
+                .then();
+    }
+
 
     private String extractPackageName(String content) {
         if (content == null || content.isBlank()) return "default";
@@ -212,7 +259,7 @@ public class StructureParserService {
     private Mono<PackageData> getOrCreatePackage(String packageName, RepositoryMetadata repo, BranchMetadata branch) {
         String effectiveName = (packageName == null || packageName.isBlank()) ? "default" : packageName;
 
-        return packageRepository.findByBranchAndPackageName(branch, effectiveName)
+        return packageRepository.findByBranchIdAndPackageName(branch.getId(), effectiveName)
                 .switchIfEmpty(Mono.defer(() -> {
                     String parentName = extractParentPackage(effectiveName);
 
@@ -220,12 +267,12 @@ public class StructureParserService {
                             ? getOrCreatePackage(parentName, repo, branch)
                             : Mono.empty();
 
-                    return parentMono.defaultIfEmpty(null).flatMap(parentPkg -> {
+                    return parentMono.flatMap(parentPkg -> {
                         PackageData newPkg = new PackageData();
                         newPkg.setPackageName(effectiveName);
                         newPkg.setRepoName(repo.getRepoName());
-                        newPkg.setBranch(branch);
-                        newPkg.setParentPackage(parentPkg);
+                        newPkg.setBranchId(branch.getId());
+                        if (parentPkg != null) newPkg.setParentPackageId(parentPkg.getId()); // Set parent package
                         return packageRepository.save(newPkg);
                     });
                 }));
@@ -236,4 +283,5 @@ public class StructureParserService {
         int lastDot = packageName.lastIndexOf('.');
         return (lastDot > 0) ? packageName.substring(0, lastDot) : null;
     }
+
 }

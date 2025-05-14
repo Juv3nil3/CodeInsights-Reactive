@@ -7,16 +7,15 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.juv3nil3.icdg.domain.ClassData;
-import com.juv3nil3.icdg.domain.FieldData;
-import com.juv3nil3.icdg.domain.FileData;
-import com.juv3nil3.icdg.domain.MethodData;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.juv3nil3.icdg.domain.*;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,77 +60,79 @@ public class JavaFileParser {
     }
 
     private void extractClassData(CompilationUnit compilationUnit, FileData fileData) {
-        if (fileData == null) {
-            throw new IllegalArgumentException("FileData cannot be null");
-        }
+        compilationUnit.findAll(ClassOrInterfaceDeclaration.class).forEach(clazz -> {
+            ClassData classData = new ClassData();
+            classData.setName(clazz.getNameAsString());
 
-        compilationUnit.findAll(ClassOrInterfaceDeclaration.class)
-                .forEach(clazz -> {
-                    try {
-                        ClassData classData = new ClassData();
-                        classData.setName(clazz.getNameAsString());
-                        classData.setAnnotations(clazz.getAnnotations().stream()
-                                .map(a -> a.getNameAsString())
-                                .collect(Collectors.toList()));
+            clazz.getComment().ifPresent(comment ->
+                    classData.setComment(comment.getContent())
+            );
 
-                        clazz.getComment().ifPresent(comment ->
-                                classData.setComment(comment.getContent())
-                        );
+            // Extract annotations on class
+            List<AnnotationData> classAnnotations = clazz.getAnnotations().stream()
+                    .map(this::toAnnotationData)
+                    .collect(Collectors.toList());
+            classData.setAnnotations(classAnnotations);
 
-                        // Extract fields (and methods) using helper methods
-                        clazz.getFields().forEach(field -> {
-                            FieldData fieldData = extractFieldData(field);
-                            if (fieldData != null) {
-                                classData.getFields().add(fieldData);
-                            }
-                        });
-                        clazz.getMethods().forEach(method -> {
-                            MethodData methodData = extractMethodData(method);
-                            if (methodData != null) {
-                                classData.getMethods().add(methodData);
-                            }
-                        });
+            // Extract fields
+            clazz.getFields().forEach(field -> {
+                FieldData fieldData = extractFieldData(field);
+                classData.getFields().add(fieldData);
+            });
 
-                        // Associate classData with fileData and avoid duplicates
-                        if (fileData.getClasses() == null) {
-                            fileData.setClasses(new ArrayList<>());
-                        }
-                        boolean exists = fileData.getClasses().stream()
-                                .anyMatch(existing -> existing.getName().equals(classData.getName()));
-                        if (!exists) {
-                            fileData.getClasses().add(classData);
-                        }
+            // Extract methods
+            clazz.getMethods().forEach(method -> {
+                MethodData methodData = extractMethodData(method);
+                classData.getMethods().add(methodData);
+            });
 
-                        classData.setFileData(fileData);
-
-                    } catch (Exception e) {
-                        System.err.println("Error extracting class data for file: " + fileData.getFilePath());
-                        e.printStackTrace();
-                    }
-                });
+            classData.setFileData(fileData);
+            fileData.getClasses().add(classData);
+        });
     }
+
 
     private FieldData extractFieldData(FieldDeclaration field) {
         FieldData fieldData = new FieldData();
 
-        field.getVariables().stream().findFirst().ifPresent(variable -> {
-            fieldData.setName(variable.getNameAsString());
+        field.getVariables().stream().findFirst().ifPresent(var -> {
+            fieldData.setName(var.getNameAsString());
         });
-        fieldData.setAnnotations(field.getAnnotations().stream()
-                .map(a -> a.getNameAsString())
-                .collect(Collectors.toList()));
-        field.getComment().ifPresent(comment -> fieldData.setComment(comment.getContent()));
+
+        field.getComment().ifPresent(comment ->
+                fieldData.setComment(comment.getContent())
+        );
+
+        List<AnnotationData> fieldAnnotations = field.getAnnotations().stream()
+                .map(this::toAnnotationData)
+                .collect(Collectors.toList());
+        fieldData.setAnnotations(fieldAnnotations);
+
         return fieldData;
     }
 
     private MethodData extractMethodData(MethodDeclaration method) {
         MethodData methodData = new MethodData();
         methodData.setName(method.getNameAsString());
-        methodData.setAnnotations(method.getAnnotations().stream()
-                .map(a -> a.getNameAsString())
-                .collect(Collectors.toList()));
-        method.getComment().ifPresent(comment -> methodData.setComment(comment.getContent()));
+
+        method.getComment().ifPresent(comment ->
+                methodData.setComment(comment.getContent())
+        );
+
+        List<AnnotationData> methodAnnotations = method.getAnnotations().stream()
+                .map(this::toAnnotationData)
+                .collect(Collectors.toList());
+        methodData.setAnnotations(methodAnnotations);
+
         return methodData;
     }
+
+
+    private AnnotationData toAnnotationData(AnnotationExpr expr) {
+        AnnotationData annotation = new AnnotationData();
+        annotation.setAnnotation(expr.getNameAsString());
+        return annotation;
+    }
+
 }
 

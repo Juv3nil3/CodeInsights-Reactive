@@ -36,9 +36,9 @@ public class DocumentationGenerationService {
     public Mono<DocumentationDTO> generateIfNecessary(String owner, String repoName, String branchName, String token) {
         return repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName)
                 .flatMap(repo ->
-                        branchMetadataRepository.findByRepositoryMetadataAndBranchName(repo, branchName)
+                        branchMetadataRepository.findByBranchNameAndRepositoryMetadataId(branchName,repo.getId())
                                 .flatMap(branch ->
-                                        documentationRepository.findByBranchMetadata(branch)
+                                        documentationRepository.findByBranchMetadataId(branch.getId())
                                                 .flatMap(existingDoc -> {
                                                     if (!existingDoc.getUpdatedAt().isBefore(branch.getUpdatedAt())) {
                                                         // Up-to-date
@@ -58,7 +58,7 @@ public class DocumentationGenerationService {
                                         structureParserService.parseRepositoryStructure(clonePath, owner, repoName, branchName)
                                                 .then(repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName))
                                                 .flatMap(repo ->
-                                                        branchMetadataRepository.findByRepositoryMetadataAndBranchName(repo, branchName)
+                                                        branchMetadataRepository.findByBranchNameAndRepositoryMetadataId(branchName, repo.getId())
                                                                 .flatMap(branch -> regenerateDocumentation(repo, branch))
                                                 )
                                 )
@@ -67,12 +67,12 @@ public class DocumentationGenerationService {
     }
 
     private Mono<Documentation> regenerateDocumentation(RepositoryMetadata repo, BranchMetadata branch) {
-        return documentationRepository.findByBranchMetadata(branch)
+        return documentationRepository.findByBranchMetadataId(branch.getId())
                 .defaultIfEmpty(new Documentation())
                 .flatMap(existingDoc ->
                         documentationBuilderService.buildDocumentation(repo, branch)
                                 .flatMap(generatedDoc -> {
-                                    //generatedDoc.setId(existingDoc.getId()); // for update
+                                    generatedDoc.setId(existingDoc.getId()); // Retain ID for update
                                     generatedDoc.setCreatedAt(existingDoc.getCreatedAt() != null
                                             ? existingDoc.getCreatedAt()
                                             : LocalDateTime.now());
@@ -81,4 +81,5 @@ public class DocumentationGenerationService {
                                 })
                 );
     }
+
 }

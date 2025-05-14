@@ -35,6 +35,10 @@ public class ClassData{
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
@@ -51,12 +55,12 @@ public class ClassData{
         this.comment = comment;
     }
 
-    public List<MethodData> getMethods() {
-        return methods;
+    public Long getFileDataId() {
+        return fileDataId;
     }
 
-    public void setMethods(List<MethodData> methods) {
-        this.methods = methods;
+    public void setFileDataId(Long fileDataId) {
+        this.fileDataId = fileDataId;
     }
 
     public FileData getFileData() {
@@ -67,6 +71,14 @@ public class ClassData{
         this.fileData = fileData;
     }
 
+    public List<MethodData> getMethods() {
+        return methods;
+    }
+
+    public void setMethods(List<MethodData> methods) {
+        this.methods = methods;
+    }
+
     public List<FieldData> getFields() {
         return fields;
     }
@@ -75,15 +87,11 @@ public class ClassData{
         this.fields = fields;
     }
 
-    @Override
-    public String toString() {
-        return "ClassData{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", comment='" + comment + '\'' +
-                ", annotations=" + annotations +
-                ", numberOfFields=" + (fields != null ? fields.size() : 0) +
-                ", numberOfMethods=" + (methods != null ? methods.size() : 0) +
-                '}';
+    public List<AnnotationData> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<AnnotationData> annotations) {
+        this.annotations = annotations;
     }
 }

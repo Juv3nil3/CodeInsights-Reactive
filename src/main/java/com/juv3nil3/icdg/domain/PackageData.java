@@ -40,6 +40,8 @@ public class PackageData {
     }
 
     // Getters and Setters
+
+
     public Long getId() {
         return id;
     }
@@ -64,20 +66,20 @@ public class PackageData {
         this.repoName = repoName;
     }
 
-    public List<BranchFileAssociation> getFileAssociations() {
-        return fileAssociations;
+    public Long getParentPackageId() {
+        return parentPackageId;
     }
 
-    public void setFileAssociations(List<BranchFileAssociation> fileAssociations) {
-        this.fileAssociations = fileAssociations;
+    public void setParentPackageId(Long parentPackageId) {
+        this.parentPackageId = parentPackageId;
     }
 
-    public BranchMetadata getBranch() {
-        return branch;
+    public Long getBranchId() {
+        return branchId;
     }
 
-    public void setBranch(BranchMetadata branch) {
-        this.branch = branch;
+    public void setBranchId(Long branchId) {
+        this.branchId = branchId;
     }
 
     public PackageData getParentPackage() {
@@ -94,6 +96,22 @@ public class PackageData {
 
     public void setSubPackages(List<PackageData> subPackages) {
         this.subPackages = subPackages;
+    }
+
+    public List<BranchFileAssociation> getFileAssociations() {
+        return fileAssociations;
+    }
+
+    public void setFileAssociations(List<BranchFileAssociation> fileAssociations) {
+        this.fileAssociations = fileAssociations;
+    }
+
+    public BranchMetadata getBranch() {
+        return branch;
+    }
+
+    public void setBranch(BranchMetadata branch) {
+        this.branch = branch;
     }
 }
 

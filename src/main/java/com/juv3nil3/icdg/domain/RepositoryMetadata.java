@@ -34,14 +34,12 @@ public class RepositoryMetadata {
         this.defaultBranch = defaultBranch;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
+    public Long getId() {
+        return id;
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getOwner() {

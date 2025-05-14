@@ -39,6 +39,10 @@ public class FileData {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getFileName() {
         return fileName;
     }
@@ -77,17 +81,6 @@ public class FileData {
 
     public void setClasses(List<ClassData> classes) {
         this.classes = classes;
-    }
-
-    @Override
-    public String toString() {
-        return "FileData{" +
-                "id=" + id +
-                ", fileName='" + fileName + '\'' +
-                ", repoName='" + repoName + '\'' +
-                ", filePath='" + filePath + '\'' +
-                ", numberOfClasses=" + (classes != null ? classes.size() : 0) +
-                '}';
     }
 }
 

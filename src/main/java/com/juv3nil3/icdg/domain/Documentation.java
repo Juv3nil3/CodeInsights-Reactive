@@ -27,16 +27,20 @@ public class Documentation {
     // Getters and Setters
 
 
-    public BranchMetadata getBranchMetadata() {
-        return branchMetadata;
-    }
-
-    public void setBranchMetadata(BranchMetadata branchMetadata) {
-        this.branchMetadata = branchMetadata;
-    }
-
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getBranchMetadataId() {
+        return branchMetadataId;
+    }
+
+    public void setBranchMetadataId(Long branchMetadataId) {
+        this.branchMetadataId = branchMetadataId;
     }
 
     public String getExportPath() {
@@ -63,6 +67,14 @@ public class Documentation {
         this.updatedAt = updatedAt;
     }
 
+    public BranchMetadata getBranchMetadata() {
+        return branchMetadata;
+    }
+
+    public void setBranchMetadata(BranchMetadata branchMetadata) {
+        this.branchMetadata = branchMetadata;
+    }
+
     public List<PackageData> getPackages() {
         return packages;
     }
@@ -70,8 +82,5 @@ public class Documentation {
     public void setPackages(List<PackageData> packages) {
         this.packages = packages;
     }
-
-
-
 }
 

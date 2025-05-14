@@ -28,6 +28,10 @@ public class BranchMetadata {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getBranchName() {
         return branchName;
     }
@@ -44,20 +48,12 @@ public class BranchMetadata {
         this.latestCommitHash = latestCommitHash;
     }
 
-    public RepositoryMetadata getRepositoryMetadata() {
-        return repositoryMetadata;
+    public Long getRepositoryMetadataId() {
+        return repositoryMetadataId;
     }
 
-    public void setRepositoryMetadata(RepositoryMetadata repositoryMetadata) {
-        this.repositoryMetadata = repositoryMetadata;
-    }
-
-    public Documentation getDocumentation() {
-        return documentation;
-    }
-
-    public void setDocumentation(Documentation documentation) {
-        this.documentation = documentation;
+    public void setRepositoryMetadataId(Long repositoryMetadataId) {
+        this.repositoryMetadataId = repositoryMetadataId;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -74,6 +70,22 @@ public class BranchMetadata {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public RepositoryMetadata getRepositoryMetadata() {
+        return repositoryMetadata;
+    }
+
+    public void setRepositoryMetadata(RepositoryMetadata repositoryMetadata) {
+        this.repositoryMetadata = repositoryMetadata;
+    }
+
+    public Documentation getDocumentation() {
+        return documentation;
+    }
+
+    public void setDocumentation(Documentation documentation) {
+        this.documentation = documentation;
     }
 }
 

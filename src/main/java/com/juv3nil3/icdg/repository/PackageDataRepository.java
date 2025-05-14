@@ -12,11 +12,10 @@ import java.util.List;
 @Repository
 public interface PackageDataRepository extends R2dbcRepository<PackageData, Long> {
 
-    Mono<PackageData> findByBranchAndPackageName(BranchMetadata branch, String packageName);
-
     Flux<PackageData> findByBranchIdAndParentPackageIsNull(Long branchId);
 
     Flux<PackageData> findAllByParentPackageId(Long parentPackageId);
     Flux<PackageData> findAllByBranchId(Long branchId);
 
+    Mono<PackageData> findByBranchIdAndPackageName(Long id, String effectiveName);
 }

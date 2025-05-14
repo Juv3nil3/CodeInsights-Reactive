@@ -15,6 +15,8 @@ public class FieldData {
     @Column(nullable = false)
     private String name; // Field name
 
+    private Long classDataId;
+
     @Transient
     private List<AnnotationData> annotations = new ArrayList<>(); // Annotations on the field
 
@@ -33,6 +35,8 @@ public class FieldData {
     }
 
     // Getters and Setters
+
+
     public Long getId() {
         return id;
     }
@@ -47,6 +51,22 @@ public class FieldData {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<AnnotationData> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<AnnotationData> annotations) {
+        this.annotations = annotations;
+    }
+
+    public Long getClassDataId() {
+        return classDataId;
+    }
+
+    public void setClassDataId(Long classDataId) {
+        this.classDataId = classDataId;
     }
 
     public String getComment() {

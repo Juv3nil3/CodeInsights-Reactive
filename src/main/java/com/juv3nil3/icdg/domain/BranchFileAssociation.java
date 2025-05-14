@@ -27,6 +27,14 @@ public class BranchFileAssociation {
     private PackageData packageData;
 
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getRepoName() {
         return repoName;
     }
@@ -41,6 +49,30 @@ public class BranchFileAssociation {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public Long getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(Long branchId) {
+        this.branchId = branchId;
+    }
+
+    public Long getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(Long fileId) {
+        this.fileId = fileId;
+    }
+
+    public Long getPackageDataId() {
+        return packageDataId;
+    }
+
+    public void setPackageDataId(Long packageDataId) {
+        this.packageDataId = packageDataId;
     }
 
     public BranchMetadata getBranch() {

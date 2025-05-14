@@ -25,6 +25,10 @@ public class MethodData {
                 return id;
         }
 
+        public void setId(Long id) {
+                this.id = id;
+        }
+
         public String getName() {
                 return name;
         }
@@ -41,12 +45,12 @@ public class MethodData {
                 this.comment = comment;
         }
 
-        public List<String> getAnnotations() {
-                return annotations;
+        public Long getClassDataId() {
+                return classDataId;
         }
 
-        public void setAnnotations(List<String> annotations) {
-                this.annotations = annotations;
+        public void setClassDataId(Long classDataId) {
+                this.classDataId = classDataId;
         }
 
         public ClassData getClassData() {
@@ -55,6 +59,14 @@ public class MethodData {
 
         public void setClassData(ClassData classData) {
                 this.classData = classData;
+        }
+
+        public List<AnnotationData> getAnnotations() {
+                return annotations;
+        }
+
+        public void setAnnotations(List<AnnotationData> annotations) {
+                this.annotations = annotations;
         }
 }
 
