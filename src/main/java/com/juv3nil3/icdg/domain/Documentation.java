@@ -18,10 +18,10 @@ public class Documentation {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private BranchMetadata branchMetadata;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private List<PackageData> packages = new ArrayList<>();
 
     // Getters and Setters

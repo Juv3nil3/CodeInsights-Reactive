@@ -18,10 +18,10 @@ public class BranchMetadata {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private RepositoryMetadata repositoryMetadata;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private Documentation documentation;
 
     public Long getId() {

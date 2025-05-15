@@ -1,5 +1,6 @@
 package com.juv3nil3.icdg.service.dto;
 
+import com.juv3nil3.icdg.domain.AnnotationData;
 import lombok.Data;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 public class MethodDTO {
     private String name;
     private String comment;
-    private List<String> annotations;
+    private List<AnnotationData> annotations;
 
     public String getName() {
         return name;
@@ -26,11 +27,11 @@ public class MethodDTO {
         this.comment = comment;
     }
 
-    public List<String> getAnnotations() {
+    public List<AnnotationData> getAnnotations() {
         return annotations;
     }
 
-    public void setAnnotations(List<String> annotations) {
+    public void setAnnotations(List<AnnotationData> annotations) {
         this.annotations = annotations;
     }
 }

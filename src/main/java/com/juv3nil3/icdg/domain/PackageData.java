@@ -20,16 +20,16 @@ public class PackageData {
     private Long parentPackageId;
     private Long branchId;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private PackageData parentPackage;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private List<PackageData> subPackages = new ArrayList<>();
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private List<BranchFileAssociation> fileAssociations = new ArrayList<>();
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private BranchMetadata branch;
 
 

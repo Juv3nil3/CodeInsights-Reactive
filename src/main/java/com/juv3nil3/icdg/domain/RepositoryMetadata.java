@@ -20,7 +20,7 @@ public class RepositoryMetadata {
     private LocalDateTime createdAt; // Timestamp when the metadata was created
     private LocalDateTime updatedAt; // Timestamp when the metadata was last updated
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private List<BranchMetadata> branches = new ArrayList<>();
 
     // Constructors, Getters, and Setters

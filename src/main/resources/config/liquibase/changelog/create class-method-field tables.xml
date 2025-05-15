@@ -7,7 +7,7 @@
 
         <!-- class_data -->
         <createTable tableName="class_data">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
@@ -17,7 +17,7 @@
 
         <!-- method_data -->
         <createTable tableName="method_data">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
@@ -27,7 +27,7 @@
 
         <!-- field_data -->
         <createTable tableName="field_data">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>

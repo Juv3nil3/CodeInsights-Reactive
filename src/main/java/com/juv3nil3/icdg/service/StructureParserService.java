@@ -56,6 +56,7 @@ public class StructureParserService {
     private static final Logger log = LoggerFactory.getLogger(StructureParserService.class);
 
     public Mono<Void> parseRepositoryStructure(Path repoPath, String owner, String repoName, String branchName) {
+        log.info("Starting structure parsing for {}/{} [{}]", owner, repoName, branchName);
         return Mono.fromCallable(() -> GitMetadataExtractor.getLatestCommitSha(repoPath, branchName))
                 .flatMap(latestCommitSha ->
                         createOrUpdateRepositoryMetadata(owner, repoName)
@@ -63,14 +64,19 @@ public class StructureParserService {
                                         branchMetadataRepository.findByBranchNameAndRepositoryMetadataId(branchName, repo.getId())
                                                 .flatMap(existingBranch -> {
                                                     if (latestCommitSha.equals(existingBranch.getLatestCommitHash())) {
+                                                        log.info("Branch {} is up-to-date. Skipping parsing.", branchName);
                                                         return Mono.empty(); // Already up-to-date
                                                     }
+                                                    log.info("Branch {} is outdated. Updating and parsing.", branchName);
                                                     return updateBranchMetadata(existingBranch, latestCommitSha)
                                                             .flatMap(branch -> parseAndWalkJavaFiles(repoPath, repo, branch));
                                                 })
                                                 .switchIfEmpty(
                                                         createOrUpdateBranchMetadata(repo, branchName, latestCommitSha)
-                                                                .flatMap(branch -> parseAndWalkJavaFiles(repoPath, repo, branch))
+                                                                .flatMap(branch -> {
+                                                                    log.info("Created new branch metadata for {}", branchName);
+                                                                    return parseAndWalkJavaFiles(repoPath, repo, branch);
+                                                                })
                                                 )
                                 )
                 );
@@ -81,6 +87,7 @@ public class StructureParserService {
     public Mono<RepositoryMetadata> createOrUpdateRepositoryMetadata(String owner, String repoName) {
         return repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName)
                 .switchIfEmpty(Mono.defer(() -> {
+                    log.info("Creating repository metadata for {}/{}", owner, repoName);
                     RepositoryMetadata newRepo = new RepositoryMetadata();
                     newRepo.setOwner(owner);
                     newRepo.setRepoName(repoName);
@@ -98,6 +105,7 @@ public class StructureParserService {
     public Mono<BranchMetadata> createOrUpdateBranchMetadata(RepositoryMetadata repo, String branchName, String latestCommitSha) {
         return branchMetadataRepository.findByBranchNameAndRepositoryMetadataId(branchName, repo.getId())
                 .switchIfEmpty(Mono.defer(() -> {
+                    log.info("Creating metadata for branch {}", branchName);
                     BranchMetadata newBranch = new BranchMetadata();
                     newBranch.setRepositoryMetadataId(repo.getId());
                     newBranch.setBranchName(branchName);
@@ -121,11 +129,13 @@ public class StructureParserService {
 
     private Mono<Void> parseAndWalkJavaFiles(Path repoPath, RepositoryMetadata repo, BranchMetadata branch) {
         try {
+            log.info("Walking files for repo {} branch {}", repo.getRepoName(), branch.getBranchName());
             return Flux.fromStream(Files.walk(repoPath))
                     .filter(path -> path.toString().endsWith(".java"))
                     .flatMap(path -> parseAndSaveFile(path, repoPath, repo, branch))
                     .then();
         } catch (IOException e) {
+            log.error("Failed to walk repo path", e);
             return Mono.error(new RuntimeException("Failed to walk repo path", e));
         }
     }

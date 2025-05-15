@@ -3,6 +3,7 @@ package com.juv3nil3.icdg.domain;
 
 import jakarta.persistence.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 
 @Entity
 public class BranchFileAssociation {
@@ -17,13 +18,13 @@ public class BranchFileAssociation {
     private Long fileId;
     private Long packageDataId;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private BranchMetadata branch;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private FileData file;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private PackageData packageData;
 
 

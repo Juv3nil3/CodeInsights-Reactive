@@ -13,16 +13,16 @@ public class ClassData{
     private String comment;
     private Long fileDataId;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private FileData fileData;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private List<MethodData> methods = new ArrayList<>();
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private List<FieldData> fields = new ArrayList<>();
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private List<AnnotationData> annotations = new ArrayList<>();
 
     public ClassData() {}

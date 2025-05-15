@@ -17,13 +17,13 @@ public class FieldData {
 
     private Long classDataId;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private List<AnnotationData> annotations = new ArrayList<>(); // Annotations on the field
 
     @Column
     private String comment; // Optional field comment
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private ClassData classData; // Reference to the parent class
 
     public FieldData() {}

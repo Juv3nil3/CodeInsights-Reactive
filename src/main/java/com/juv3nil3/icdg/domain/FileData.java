@@ -18,7 +18,7 @@ public class FileData {
 
     private String contentHash;
 
-    @Transient
+    @org.springframework.data.annotation.Transient
     private List<ClassData> classes = new ArrayList<>();
 
     // Helper methods for managing the bidirectional relationship

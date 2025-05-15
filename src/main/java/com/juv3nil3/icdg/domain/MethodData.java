@@ -15,10 +15,10 @@ public class MethodData {
         private String comment;
         private Long classDataId;
 
-        @Transient
+        @org.springframework.data.annotation.Transient
         private ClassData classData;
 
-        @Transient
+        @org.springframework.data.annotation.Transient
         private List<AnnotationData> annotations = new ArrayList<>();
 
         public Long getId() {
