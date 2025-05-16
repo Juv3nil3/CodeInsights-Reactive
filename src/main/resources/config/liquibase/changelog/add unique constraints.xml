@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="005" author="juv3nil3">
+        <addUniqueConstraint
+                tableName="repository_metadata"
+                columnNames="owner, repo_name"
+                constraintName="uq_owner_repo"/>
+    </changeSet>
+
+    <changeSet id="006" author="juv3nil3">
+        <addUniqueConstraint
+                tableName="branch_metadata"
+                columnNames="branch_name, repository_metadata_id"
+                constraintName="uq_branch_repo"/>
+    </changeSet>
+
+</databaseChangeLog>

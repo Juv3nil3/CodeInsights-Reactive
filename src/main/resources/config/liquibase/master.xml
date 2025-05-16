@@ -20,6 +20,7 @@
     <include file="config/liquibase/changelog/create file_repository_branch.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/create foreign keys.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/create class-method-field tables.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/add unique constraints.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->

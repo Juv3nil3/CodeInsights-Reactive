@@ -8,6 +8,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -21,6 +22,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,8 +57,11 @@ public class StructureParserService {
 
     private static final Logger log = LoggerFactory.getLogger(StructureParserService.class);
 
+    private final ConcurrentHashMap<String, Mono<RepositoryMetadata>> repositoryLocks = new ConcurrentHashMap<>();
+
     public Mono<Void> parseRepositoryStructure(Path repoPath, String owner, String repoName, String branchName) {
         log.info("Starting structure parsing for {}/{} [{}]", owner, repoName, branchName);
+
         return Mono.fromCallable(() -> GitMetadataExtractor.getLatestCommitSha(repoPath, branchName))
                 .flatMap(latestCommitSha ->
                         createOrUpdateRepositoryMetadata(owner, repoName)
@@ -65,17 +70,17 @@ public class StructureParserService {
                                                 .flatMap(existingBranch -> {
                                                     if (latestCommitSha.equals(existingBranch.getLatestCommitHash())) {
                                                         log.info("Branch {} is up-to-date. Skipping parsing.", branchName);
-                                                        return Mono.empty(); // Already up-to-date
+                                                        return Mono.empty();
                                                     }
                                                     log.info("Branch {} is outdated. Updating and parsing.", branchName);
-                                                    return updateBranchMetadata(existingBranch, latestCommitSha)
-                                                            .flatMap(branch -> parseAndWalkJavaFiles(repoPath, repo, branch));
+                                                    return createOrUpdateBranchMetadata(repo, branchName, latestCommitSha)
+                                                            .flatMap(updatedBranch -> parseAndWalkJavaFiles(repoPath, repo, updatedBranch));
                                                 })
                                                 .switchIfEmpty(
                                                         createOrUpdateBranchMetadata(repo, branchName, latestCommitSha)
-                                                                .flatMap(branch -> {
+                                                                .flatMap(newBranch -> {
                                                                     log.info("Created new branch metadata for {}", branchName);
-                                                                    return parseAndWalkJavaFiles(repoPath, repo, branch);
+                                                                    return parseAndWalkJavaFiles(repoPath, repo, newBranch);
                                                                 })
                                                 )
                                 )
@@ -84,48 +89,25 @@ public class StructureParserService {
 
 
 
+
     public Mono<RepositoryMetadata> createOrUpdateRepositoryMetadata(String owner, String repoName) {
-        return repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName)
-                .switchIfEmpty(Mono.defer(() -> {
-                    log.info("Creating repository metadata for {}/{}", owner, repoName);
-                    RepositoryMetadata newRepo = new RepositoryMetadata();
-                    newRepo.setOwner(owner);
-                    newRepo.setRepoName(repoName);
-                    newRepo.setCreatedAt(LocalDateTime.now());
-                    newRepo.setUpdatedAt(LocalDateTime.now());
-                    return repositoryMetadataRepository.save(newRepo);
-                }))
-                .flatMap(existing -> {
-                    existing.setUpdatedAt(LocalDateTime.now());
-                    return repositoryMetadataRepository.save(existing);
-                });
+
+        LocalDateTime now = LocalDateTime.now();
+
+        return repositoryMetadataRepository.mergeMetadata(owner, repoName, now, now)
+                .then(repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName));
     }
 
 
     public Mono<BranchMetadata> createOrUpdateBranchMetadata(RepositoryMetadata repo, String branchName, String latestCommitSha) {
-        return branchMetadataRepository.findByBranchNameAndRepositoryMetadataId(branchName, repo.getId())
-                .switchIfEmpty(Mono.defer(() -> {
-                    log.info("Creating metadata for branch {}", branchName);
-                    BranchMetadata newBranch = new BranchMetadata();
-                    newBranch.setRepositoryMetadataId(repo.getId());
-                    newBranch.setBranchName(branchName);
-                    newBranch.setLatestCommitHash(latestCommitSha);
-                    newBranch.setCreatedAt(LocalDateTime.now());
-                    newBranch.setUpdatedAt(LocalDateTime.now());
-                    return branchMetadataRepository.save(newBranch);
-                }))
-                .flatMap(existing -> {
-                    existing.setUpdatedAt(LocalDateTime.now());
-                    existing.setLatestCommitHash(latestCommitSha);
-                    return branchMetadataRepository.save(existing);
-                });
+        LocalDateTime now = LocalDateTime.now();
+
+        return branchMetadataRepository
+                .mergeBranchMetadata(branchName, latestCommitSha, repo.getId(), now, now)
+                .then(branchMetadataRepository.findByBranchNameAndRepositoryMetadataId(branchName, repo.getId()));
     }
 
-    public Mono<BranchMetadata> updateBranchMetadata(BranchMetadata branch, String latestCommitSha) {
-        branch.setUpdatedAt(LocalDateTime.now());
-        branch.setLatestCommitHash(latestCommitSha);
-        return branchMetadataRepository.save(branch);
-    }
+
 
     private Mono<Void> parseAndWalkJavaFiles(Path repoPath, RepositoryMetadata repo, BranchMetadata branch) {
         try {
