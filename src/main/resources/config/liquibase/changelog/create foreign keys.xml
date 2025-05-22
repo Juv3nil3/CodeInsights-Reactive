@@ -4,59 +4,63 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
     <changeSet id="004" author="juv3nil3">
-        <!-- Foreign keys for branch_metadata -->
+        <!-- Foreign key for branch_metadata.repository_metadata_id -> repository_metadata.id -->
         <addForeignKeyConstraint baseTableName="branch_metadata"
                                  baseColumnNames="repository_metadata_id"
                                  referencedTableName="repository_metadata"
                                  referencedColumnNames="id"
                                  constraintName="fk_branch_repository"/>
 
-        <!-- Foreign key for documentation -->
+        <!-- Foreign key: documentation.branch_metadata_id -> branch_metadata.id -->
         <addForeignKeyConstraint baseTableName="documentation"
                                  baseColumnNames="branch_metadata_id"
                                  referencedTableName="branch_metadata"
                                  referencedColumnNames="id"
                                  constraintName="fk_documentation_branch"/>
 
-        <!-- Foreign key for documentation_packages -->
+        <!-- documentation_packages.documentation_id -> documentation.id -->
         <addForeignKeyConstraint baseTableName="documentation_packages"
                                  baseColumnNames="documentation_id"
                                  referencedTableName="documentation"
                                  referencedColumnNames="id"
                                  constraintName="fk_docpkg_documentation"/>
 
+        <!-- documentation_packages.package_data_id -> package_data.id -->
         <addForeignKeyConstraint baseTableName="documentation_packages"
                                  baseColumnNames="package_data_id"
                                  referencedTableName="package_data"
                                  referencedColumnNames="id"
                                  constraintName="fk_docpkg_package"/>
 
-        <!-- Foreign key for package_data -->
+        <!-- package_data.parent_package_id -> package_data.id -->
         <addForeignKeyConstraint baseTableName="package_data"
                                  baseColumnNames="parent_package_id"
                                  referencedTableName="package_data"
                                  referencedColumnNames="id"
                                  constraintName="fk_package_parent"/>
 
+        <!-- package_data.branch_id -> branch_metadata.id -->
         <addForeignKeyConstraint baseTableName="package_data"
                                  baseColumnNames="branch_id"
                                  referencedTableName="branch_metadata"
                                  referencedColumnNames="id"
                                  constraintName="fk_package_branch"/>
 
-        <!-- Foreign key for branch_file_association -->
+        <!-- branch_file_association.branch_id -> branch_metadata.id -->
         <addForeignKeyConstraint baseTableName="branch_file_association"
                                  baseColumnNames="branch_id"
                                  referencedTableName="branch_metadata"
                                  referencedColumnNames="id"
                                  constraintName="fk_bfa_branch"/>
 
+        <!-- branch_file_association.file_id -> file_data.id -->
         <addForeignKeyConstraint baseTableName="branch_file_association"
                                  baseColumnNames="file_id"
                                  referencedTableName="file_data"
                                  referencedColumnNames="id"
                                  constraintName="fk_bfa_file"/>
 
+        <!-- branch_file_association.package_data_id -> package_data.id -->
         <addForeignKeyConstraint baseTableName="branch_file_association"
                                  baseColumnNames="package_data_id"
                                  referencedTableName="package_data"

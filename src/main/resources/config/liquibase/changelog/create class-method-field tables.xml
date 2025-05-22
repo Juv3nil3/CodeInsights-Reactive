@@ -7,43 +7,43 @@
 
         <!-- class_data -->
         <createTable tableName="class_data">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
             <column name="comment" type="TEXT"/>
-            <column name="file_data_id" type="BIGINT"/>
+            <column name="file_data_id" type="UUID"/>
         </createTable>
 
         <!-- method_data -->
         <createTable tableName="method_data">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
             <column name="comment" type="TEXT"/>
-            <column name="class_data_id" type="BIGINT"/>
+            <column name="class_data_id" type="UUID"/>
         </createTable>
 
         <!-- field_data -->
         <createTable tableName="field_data">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(255)"/>
             <column name="comment" type="TEXT"/>
-            <column name="class_data_id" type="BIGINT"/>
+            <column name="class_data_id" type="UUID"/>
         </createTable>
 
         <!-- annotation_data -->
         <createTable tableName="annotation_data">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="annotation" type="VARCHAR(255)" />
-            <column name="class_data_id" type="BIGINT"/>
-            <column name="method_data_id" type="BIGINT"/>
-            <column name="field_data_id" type="BIGINT"/>
+            <column name="class_data_id" type="UUID"/>
+            <column name="method_data_id" type="UUID"/>
+            <column name="field_data_id" type="UUID"/>
         </createTable>
 
     </changeSet>

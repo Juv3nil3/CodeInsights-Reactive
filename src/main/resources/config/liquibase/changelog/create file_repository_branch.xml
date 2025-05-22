@@ -4,8 +4,9 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
     <changeSet id="003" author="juv3nil3">
+        <!-- REPO -->
         <createTable tableName="repository_metadata">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="owner" type="VARCHAR(255)"/>
@@ -16,21 +17,21 @@
             <column name="updated_at" type="TIMESTAMP"/>
         </createTable>
 
-        <!-- Create branch_metadata table -->
+        <!-- BRANCH -->
         <createTable tableName="branch_metadata">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="branch_name" type="VARCHAR(255)"/>
             <column name="latest_commit_hash" type="VARCHAR(255)"/>
             <column name="created_at" type="TIMESTAMP"/>
             <column name="updated_at" type="TIMESTAMP"/>
-            <column name="repository_metadata_id" type="BIGINT"/>
+            <column name="repository_metadata_id" type="UUID"/>
         </createTable>
 
-        <!-- Create file_data table -->
+        <!-- FILE -->
         <createTable tableName="file_data">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="file_name" type="VARCHAR(255)"/>
@@ -39,46 +40,46 @@
             <column name="content_hash" type="VARCHAR(255)"/>
         </createTable>
 
-        <!-- Create package_data table -->
+        <!-- PACKAGE -->
         <createTable tableName="package_data">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="package_name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="repo_name" type="VARCHAR(255)"/>
-            <column name="parent_package_id" type="BIGINT"/>
-            <column name="branch_id" type="BIGINT"/>
+            <column name="parent_package_id" type="UUID"/>
+            <column name="branch_id" type="UUID"/>
         </createTable>
 
-        <!-- Create documentation table -->
+        <!-- documentation table -->
         <createTable tableName="documentation">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="branch_metadata_id" type="BIGINT"/>
+            <column name="branch_metadata_id" type="UUID"/>
             <column name="export_path" type="VARCHAR(1024)"/>
             <column name="created_at" type="TIMESTAMP"/>
             <column name="updated_at" type="TIMESTAMP"/>
         </createTable>
 
-        <!-- Create documentation_packages join table -->
+        <!-- documentation_packages join table -->
         <createTable tableName="documentation_packages">
-            <column name="documentation_id" type="BIGINT"/>
-            <column name="package_data_id" type="BIGINT"/>
+            <column name="documentation_id" type="UUID"/>
+            <column name="package_data_id" type="UUID"/>
         </createTable>
 
-        <!-- Create branch_file_association table -->
+        <!-- BRANCH-FILE ASSOCIATION -->
         <createTable tableName="branch_file_association">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="repo_name" type="VARCHAR(255)"/>
             <column name="file_path" type="VARCHAR(1024)"/>
-            <column name="branch_id" type="BIGINT"/>
-            <column name="file_id" type="BIGINT"/>
-            <column name="package_data_id" type="BIGINT"/>
+            <column name="branch_id" type="UUID"/>
+            <column name="file_id" type="UUID"/>
+            <column name="package_data_id" type="UUID"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

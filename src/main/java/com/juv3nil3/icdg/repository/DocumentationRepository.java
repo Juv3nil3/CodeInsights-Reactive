@@ -9,12 +9,13 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Repository
-public interface DocumentationRepository extends R2dbcRepository<Documentation, Long> {
+public interface DocumentationRepository extends R2dbcRepository<Documentation, UUID> {
 
 
-    Mono<Documentation> findByBranchMetadataId(Long branchMetadataId);
+    Mono<Documentation> findByBranchMetadataId(UUID branchMetadataId);
 
 }

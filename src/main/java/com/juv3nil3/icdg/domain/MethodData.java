@@ -4,16 +4,18 @@ package com.juv3nil3.icdg.domain;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 public class MethodData {
 
         @Id
-        private Long id;
+        private UUID id;
+
 
         private String name;
         private String comment;
-        private Long classDataId;
+        private UUID classDataId;
 
         @org.springframework.data.annotation.Transient
         private ClassData classData;
@@ -21,11 +23,11 @@ public class MethodData {
         @org.springframework.data.annotation.Transient
         private List<AnnotationData> annotations = new ArrayList<>();
 
-        public Long getId() {
+        public UUID getId() {
                 return id;
         }
 
-        public void setId(Long id) {
+        public void setId(UUID id) {
                 this.id = id;
         }
 
@@ -45,11 +47,11 @@ public class MethodData {
                 this.comment = comment;
         }
 
-        public Long getClassDataId() {
+        public UUID getClassDataId() {
                 return classDataId;
         }
 
-        public void setClassDataId(Long classDataId) {
+        public void setClassDataId(UUID classDataId) {
                 this.classDataId = classDataId;
         }
 

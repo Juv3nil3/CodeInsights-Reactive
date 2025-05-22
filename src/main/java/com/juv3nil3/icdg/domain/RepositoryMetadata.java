@@ -5,12 +5,14 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 public class RepositoryMetadata {
 
     @Id
-    private Long id;
+    private UUID id;
+
 
     private String owner; // Owner of the repository
     private String repoName; // Name of the repository
@@ -34,11 +36,21 @@ public class RepositoryMetadata {
         this.defaultBranch = defaultBranch;
     }
 
-    public Long getId() {
+    public RepositoryMetadata(UUID uuid, String owner, String repoName, String description, String defaultBranch, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = uuid;
+        this.owner = owner;
+        this.repoName = repoName;
+        this.description = description;
+        this.defaultBranch = defaultBranch;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

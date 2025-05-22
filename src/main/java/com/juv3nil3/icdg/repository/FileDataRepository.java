@@ -10,9 +10,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface FileDataRepository extends R2dbcRepository<FileData,Long> {
+public interface FileDataRepository extends R2dbcRepository<FileData, UUID> {
 
     Mono<FileData> findByRepoNameAndContentHash(String repoName, String contentHash);
 

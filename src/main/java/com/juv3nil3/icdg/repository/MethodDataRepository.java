@@ -1,13 +1,16 @@
 package com.juv3nil3.icdg.repository;
 
 import com.juv3nil3.icdg.domain.MethodData;
+import org.apache.commons.text.translate.UnicodeUnescaper;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
-@Repository
-public interface MethodDataRepository extends R2dbcRepository<MethodData, Long> {
+import java.util.UUID;
 
-    Flux<MethodData> findAllByClassDataId(Long classDataId);
+@Repository
+public interface MethodDataRepository extends R2dbcRepository<MethodData, UUID> {
+
+    Flux<MethodData> findAllByClassDataId(UUID classDataId);
 
 }

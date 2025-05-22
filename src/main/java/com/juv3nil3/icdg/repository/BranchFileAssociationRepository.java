@@ -9,16 +9,18 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Repository
-public interface BranchFileAssociationRepository extends R2dbcRepository<BranchFileAssociation,Long> {
+import java.util.UUID;
 
-    Mono<BranchFileAssociation> findByBranchIdAndFileId(Long branchId, Long fileId);
+@Repository
+public interface BranchFileAssociationRepository extends R2dbcRepository<BranchFileAssociation, UUID> {
+
+    Mono<BranchFileAssociation> findByBranchIdAndFileId(UUID branchId, UUID fileId);
 
     Flux<BranchFileAssociation> findAllByBranchAndPackageData(BranchMetadata branch, PackageData packageData);
 
-    Flux<BranchFileAssociation> findAllByBranchId(Long branchId);
-    Flux<BranchFileAssociation> findAllByFileId(Long fileId);
-    Flux<BranchFileAssociation> findAllByPackageDataId(Long packageDataId);
+    Flux<BranchFileAssociation> findAllByBranchId(UUID branchId);
+    Flux<BranchFileAssociation> findAllByFileId(UUID fileId);
+    Flux<BranchFileAssociation> findAllByPackageDataId(UUID packageDataId);
 
 
 }

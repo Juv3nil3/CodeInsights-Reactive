@@ -3,20 +3,29 @@ package com.juv3nil3.icdg.repository;
 import com.juv3nil3.icdg.domain.RepositoryMetadata;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Repository
-public interface RepositoryMetadataRepo extends R2dbcRepository<RepositoryMetadata,Long> {
+public interface RepositoryMetadataRepo extends R2dbcRepository<RepositoryMetadata, UUID> {
 
     @Query("""
-        MERGE INTO repository_metadata (owner, repo_name, created_at, updated_at)
-        KEY (owner, repo_name)
-        VALUES (:owner, :repoName, :createdAt, :updatedAt)
-    """)
-    Mono<Void> mergeMetadata(String owner, String repoName, LocalDateTime createdAt, LocalDateTime updatedAt);
+    MERGE INTO repository_metadata (id, owner, repo_name, created_at, updated_at)
+    KEY (owner, repo_name)
+    VALUES (:id, :owner, :repoName, :createdAt, :updatedAt)
+""")
+    Mono<Void> mergeMetadata(
+            @Param("id") UUID id,
+            @Param("owner") String owner,
+            @Param("repoName") String repoName,
+            @Param("createdAt") LocalDateTime createdAt,
+            @Param("updatedAt") LocalDateTime updatedAt
+    );
+
 
     Mono<RepositoryMetadata> findByOwnerAndRepoName(String owner, String repoName);
 }

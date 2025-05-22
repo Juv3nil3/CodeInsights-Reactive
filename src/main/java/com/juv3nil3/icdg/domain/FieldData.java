@@ -4,18 +4,20 @@ package com.juv3nil3.icdg.domain;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity
 public class FieldData {
 
     @Id
-    private Long id;
+    private UUID id;
+
 
     @Column(nullable = false)
     private String name; // Field name
 
-    private Long classDataId;
+    private UUID classDataId;
 
     @org.springframework.data.annotation.Transient
     private List<AnnotationData> annotations = new ArrayList<>(); // Annotations on the field
@@ -37,11 +39,11 @@ public class FieldData {
     // Getters and Setters
 
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -61,11 +63,11 @@ public class FieldData {
         this.annotations = annotations;
     }
 
-    public Long getClassDataId() {
+    public UUID getClassDataId() {
         return classDataId;
     }
 
-    public void setClassDataId(Long classDataId) {
+    public void setClassDataId(UUID classDataId) {
         this.classDataId = classDataId;
     }
 

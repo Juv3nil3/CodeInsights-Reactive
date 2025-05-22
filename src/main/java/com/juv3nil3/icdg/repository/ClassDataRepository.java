@@ -8,11 +8,12 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface ClassDataRepository extends R2dbcRepository<ClassData, Long> {
+public interface ClassDataRepository extends R2dbcRepository<ClassData, UUID> {
 
-    Flux<ClassData> findAllByFileDataId(Long fileDataId);
+    Flux<ClassData> findAllByFileDataId(UUID fileDataId);
 
 
 }

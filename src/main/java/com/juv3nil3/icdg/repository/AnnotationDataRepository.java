@@ -5,12 +5,14 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
-@Repository
-public interface AnnotationDataRepository extends R2dbcRepository<AnnotationData, Long> {
+import java.util.UUID;
 
-    Flux<AnnotationData> findAllByClassDataId(Long classDataId);
-    Flux<AnnotationData> findAllByMethodDataId(Long methodDataId);
-    Flux<AnnotationData> findAllByFieldDataId(Long fieldDataId);
+@Repository
+public interface AnnotationDataRepository extends R2dbcRepository<AnnotationData, UUID> {
+
+    Flux<AnnotationData> findAllByClassDataId(UUID classDataId);
+    Flux<AnnotationData> findAllByMethodDataId(UUID methodDataId);
+    Flux<AnnotationData> findAllByFieldDataId(UUID fieldDataId);
 
 
 }

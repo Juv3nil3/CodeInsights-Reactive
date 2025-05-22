@@ -5,12 +5,14 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 public class FileData {
 
     @Id
-    private Long id;
+    private UUID id;
+
 
     private String fileName;
     private String repoName;
@@ -35,11 +37,11 @@ public class FileData {
     // Getters and Setters
 
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

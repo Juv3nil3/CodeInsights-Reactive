@@ -8,14 +8,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface PackageDataRepository extends R2dbcRepository<PackageData, Long> {
+public interface PackageDataRepository extends R2dbcRepository<PackageData, UUID> {
 
-    Flux<PackageData> findByBranchIdAndParentPackageIsNull(Long branchId);
+    Flux<PackageData> findByBranchIdAndParentPackageIsNull(UUID branchId);
 
-    Flux<PackageData> findAllByParentPackageId(Long parentPackageId);
-    Flux<PackageData> findAllByBranchId(Long branchId);
+    Flux<PackageData> findAllByParentPackageId(UUID parentPackageId);
+    Flux<PackageData> findAllByBranchId(UUID branchId);
 
-    Mono<PackageData> findByBranchIdAndPackageName(Long id, String effectiveName);
+    Mono<PackageData> findByBranchIdAndPackageName(UUID id, String effectiveName);
 }

@@ -5,9 +5,11 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
-@Repository
-public interface FieldDataRepository extends R2dbcRepository<FieldData,Long> {
+import java.util.UUID;
 
-    Flux<FieldData> findAllByClassDataId(Long classDataId);
+@Repository
+public interface FieldDataRepository extends R2dbcRepository<FieldData, UUID> {
+
+    Flux<FieldData> findAllByClassDataId(UUID classDataId);
 
 }

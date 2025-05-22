@@ -4,21 +4,23 @@ import com.juv3nil3.icdg.domain.elasticsearch.ClassDataDocument;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity
 public class PackageData {
 
     @Id
-    private Long id;
+    private UUID id;
+
 
     @Column(nullable = false)
     private String packageName;
 
     private String repoName;
 
-    private Long parentPackageId;
-    private Long branchId;
+    private UUID parentPackageId;
+    private UUID branchId;
 
     @org.springframework.data.annotation.Transient
     private PackageData parentPackage;
@@ -42,11 +44,11 @@ public class PackageData {
     // Getters and Setters
 
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -66,19 +68,19 @@ public class PackageData {
         this.repoName = repoName;
     }
 
-    public Long getParentPackageId() {
+    public UUID getParentPackageId() {
         return parentPackageId;
     }
 
-    public void setParentPackageId(Long parentPackageId) {
+    public void setParentPackageId(UUID parentPackageId) {
         this.parentPackageId = parentPackageId;
     }
 
-    public Long getBranchId() {
+    public UUID getBranchId() {
         return branchId;
     }
 
-    public void setBranchId(Long branchId) {
+    public void setBranchId(UUID branchId) {
         this.branchId = branchId;
     }
 

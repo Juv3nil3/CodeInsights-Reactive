@@ -5,14 +5,16 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 public class Documentation {
 
     @Id
-    private Long id;
+    private UUID id;
 
-    private Long branchMetadataId;
+
+    private UUID branchMetadataId;
 
     private String exportPath;
     private LocalDateTime createdAt;
@@ -27,19 +29,19 @@ public class Documentation {
     // Getters and Setters
 
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public Long getBranchMetadataId() {
+    public UUID getBranchMetadataId() {
         return branchMetadataId;
     }
 
-    public void setBranchMetadataId(Long branchMetadataId) {
+    public void setBranchMetadataId(UUID branchMetadataId) {
         this.branchMetadataId = branchMetadataId;
     }
 

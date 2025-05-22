@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class DocumentationBuilderService {
@@ -32,25 +33,30 @@ public class DocumentationBuilderService {
 
     public Mono<Documentation> buildDocumentation(RepositoryMetadata repo, BranchMetadata branchMetadata) {
         Documentation documentation = new Documentation();
+
+        // Generate and set UUID for id
+        documentation.setId(UUID.randomUUID());
+
         documentation.setBranchMetadataId(branchMetadata.getId());
         documentation.setCreatedAt(LocalDateTime.now());
         documentation.setUpdatedAt(LocalDateTime.now());
+        documentation.setBranchMetadata(branchMetadata); // transient only
 
         return packageDataRepository.findAllByBranchId(branchMetadata.getId())
                 .collectList()
                 .flatMap(packages -> {
                     documentation.setPackages(packages);
 
-                    // OPTIONAL: hydrate nested data for downstream uses
+                    // Hydrate fileAssociations for each package
                     return Flux.fromIterable(packages)
                             .flatMap(pkg ->
                                     branchFileAssociationRepository.findAllByPackageDataId(pkg.getId())
                                             .collectList()
                                             .doOnNext(pkg::setFileAssociations)
                             )
-                            .then(Mono.just(documentation));
+                            .then(Mono.just(documentation)); // Wait for all hydration to complete
                 })
-                .flatMap(documentationRepository::save);
+                .flatMap(documentationRepository::save); // Save only after everything is ready
     }
 
 }

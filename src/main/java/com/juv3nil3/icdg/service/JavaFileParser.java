@@ -63,7 +63,14 @@ public class JavaFileParser {
         compilationUnit.findAll(ClassOrInterfaceDeclaration.class).forEach(clazz -> {
             ClassData classData = new ClassData();
             classData.setName(clazz.getNameAsString());
+            classData.setFileData(fileData);
 
+            //Initialize collections to avoid NullPointerException
+            classData.setFields(new ArrayList<>());
+            classData.setMethods(new ArrayList<>());
+            classData.setAnnotations(new ArrayList<>());
+
+            // Optional comment
             clazz.getComment().ifPresent(comment ->
                     classData.setComment(comment.getContent())
             );
@@ -72,28 +79,31 @@ public class JavaFileParser {
             List<AnnotationData> classAnnotations = clazz.getAnnotations().stream()
                     .map(this::toAnnotationData)
                     .collect(Collectors.toList());
-            classData.setAnnotations(classAnnotations);
+            classData.getAnnotations().addAll(classAnnotations); // ✅ Use addAll for consistency
 
             // Extract fields
             clazz.getFields().forEach(field -> {
                 FieldData fieldData = extractFieldData(field);
+                fieldData.setClassData(classData);
                 classData.getFields().add(fieldData);
             });
 
             // Extract methods
             clazz.getMethods().forEach(method -> {
                 MethodData methodData = extractMethodData(method);
+                methodData.setClassData(classData);
                 classData.getMethods().add(methodData);
             });
 
-            classData.setFileData(fileData);
             fileData.getClasses().add(classData);
         });
     }
 
 
+
     private FieldData extractFieldData(FieldDeclaration field) {
         FieldData fieldData = new FieldData();
+        fieldData.setAnnotations(new ArrayList<>());
 
         field.getVariables().stream().findFirst().ifPresent(var -> {
             fieldData.setName(var.getNameAsString());
@@ -106,13 +116,14 @@ public class JavaFileParser {
         List<AnnotationData> fieldAnnotations = field.getAnnotations().stream()
                 .map(this::toAnnotationData)
                 .collect(Collectors.toList());
-        fieldData.setAnnotations(fieldAnnotations);
+        fieldData.getAnnotations().addAll(fieldAnnotations);
 
         return fieldData;
     }
 
     private MethodData extractMethodData(MethodDeclaration method) {
         MethodData methodData = new MethodData();
+        methodData.setAnnotations(new ArrayList<>());
         methodData.setName(method.getNameAsString());
 
         method.getComment().ifPresent(comment ->
@@ -122,7 +133,7 @@ public class JavaFileParser {
         List<AnnotationData> methodAnnotations = method.getAnnotations().stream()
                 .map(this::toAnnotationData)
                 .collect(Collectors.toList());
-        methodData.setAnnotations(methodAnnotations);
+        methodData.getAnnotations().addAll(methodAnnotations);
 
         return methodData;
     }

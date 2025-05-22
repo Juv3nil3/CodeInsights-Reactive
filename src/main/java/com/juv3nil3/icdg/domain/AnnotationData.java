@@ -4,23 +4,26 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 import org.springframework.data.annotation.Id;
 
+import java.util.UUID;
+
 @Entity
 public class AnnotationData {
 
     @Id
-    private Long id;
+    private UUID id;
+
 
     private String annotation;
 
-    private Long classDataId;  // Nullable if it's for a method
-    private Long methodDataId; // Nullable if it's for a class
-    private Long fieldDataId;
+    private UUID classDataId;  // Nullable if it's for a method
+    private UUID methodDataId; // Nullable if it's for a class
+    private UUID fieldDataId;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -32,27 +35,27 @@ public class AnnotationData {
         this.annotation = annotation;
     }
 
-    public Long getClassDataId() {
+    public UUID getClassDataId() {
         return classDataId;
     }
 
-    public void setClassDataId(Long classDataId) {
+    public void setClassDataId(UUID classDataId) {
         this.classDataId = classDataId;
     }
 
-    public Long getMethodDataId() {
+    public UUID getMethodDataId() {
         return methodDataId;
     }
 
-    public void setMethodDataId(Long methodDataId) {
+    public void setMethodDataId(UUID methodDataId) {
         this.methodDataId = methodDataId;
     }
 
-    public Long getFieldDataId() {
+    public UUID getFieldDataId() {
         return fieldDataId;
     }
 
-    public void setFieldDataId(Long fieldDataId) {
+    public void setFieldDataId(UUID fieldDataId) {
         this.fieldDataId = fieldDataId;
     }
 }

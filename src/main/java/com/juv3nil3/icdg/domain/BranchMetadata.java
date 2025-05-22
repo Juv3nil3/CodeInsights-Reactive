@@ -3,17 +3,19 @@ package com.juv3nil3.icdg.domain;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 public class BranchMetadata {
 
     @Id
-    private Long id;
+    private UUID id;
+
 
     private String branchName;
     private String latestCommitHash;
 
-    private Long repositoryMetadataId;
+    private UUID repositoryMetadataId;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -24,11 +26,20 @@ public class BranchMetadata {
     @org.springframework.data.annotation.Transient
     private Documentation documentation;
 
-    public Long getId() {
+    public BranchMetadata(UUID id, String branchName, String latestCommitHash, UUID repositoryMetadataId, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.branchName = branchName;
+        this.latestCommitHash = latestCommitHash;
+        this.repositoryMetadataId = repositoryMetadataId;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -48,11 +59,11 @@ public class BranchMetadata {
         this.latestCommitHash = latestCommitHash;
     }
 
-    public Long getRepositoryMetadataId() {
+    public UUID getRepositoryMetadataId() {
         return repositoryMetadataId;
     }
 
-    public void setRepositoryMetadataId(Long repositoryMetadataId) {
+    public void setRepositoryMetadataId(UUID repositoryMetadataId) {
         this.repositoryMetadataId = repositoryMetadataId;
     }
 

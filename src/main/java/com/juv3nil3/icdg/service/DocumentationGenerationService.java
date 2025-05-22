@@ -66,9 +66,9 @@ public class DocumentationGenerationService {
                 .switchIfEmpty(Mono.defer(() -> {
                     log.warn("Repository or branch not found. Cloning and parsing repository: {}/{}:{}", owner, repoName, branchName);
                     return gitCloneService.cloneRepository(owner, repoName, branchName, token)
-                            .doOnNext(path -> log.info("Repository cloned to path: {}", path))
                             .flatMap(clonePath ->
                                     structureParserService.parseRepositoryStructure(clonePath, owner, repoName, branchName)
+                                            .doOnSuccess(v -> log.info("Structure parsed successfully."))
                                             .then(repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName))
                                             .flatMap(repo ->
                                                     branchMetadataRepository.findByBranchNameAndRepositoryMetadataId(branchName, repo.getId())

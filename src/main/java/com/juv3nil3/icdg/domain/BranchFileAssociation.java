@@ -5,18 +5,21 @@ import jakarta.persistence.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 
+import java.util.UUID;
+
 @Entity
 public class BranchFileAssociation {
 
     @Id
-    private Long id;
+    private UUID id;
+
 
     private String repoName;
     private String filePath;
 
-    private Long branchId;
-    private Long fileId;
-    private Long packageDataId;
+    private UUID branchId;
+    private UUID fileId;
+    private UUID packageDataId;
 
     @org.springframework.data.annotation.Transient
     private BranchMetadata branch;
@@ -28,11 +31,11 @@ public class BranchFileAssociation {
     private PackageData packageData;
 
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -52,27 +55,27 @@ public class BranchFileAssociation {
         this.filePath = filePath;
     }
 
-    public Long getBranchId() {
+    public UUID getBranchId() {
         return branchId;
     }
 
-    public void setBranchId(Long branchId) {
+    public void setBranchId(UUID branchId) {
         this.branchId = branchId;
     }
 
-    public Long getFileId() {
+    public UUID getFileId() {
         return fileId;
     }
 
-    public void setFileId(Long fileId) {
+    public void setFileId(UUID fileId) {
         this.fileId = fileId;
     }
 
-    public Long getPackageDataId() {
+    public UUID getPackageDataId() {
         return packageDataId;
     }
 
-    public void setPackageDataId(Long packageDataId) {
+    public void setPackageDataId(UUID packageDataId) {
         this.packageDataId = packageDataId;
     }
 
