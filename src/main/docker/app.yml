@@ -9,7 +9,7 @@ services:
       - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
       - SPRING_R2DBC_URL=r2dbc:postgresql://postgresql:5432/icdg
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://postgresql:5432/icdg
-      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER_URI=http://keycloak:9080/realms/jhipster
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER_URI=http://keycloak:9083/realms/jhipster
       - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_CLIENT_ID=web_app
       - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_CLIENT_SECRET=web_app
       - SPRING_ELASTICSEARCH_URIS=http://elasticsearch:9200

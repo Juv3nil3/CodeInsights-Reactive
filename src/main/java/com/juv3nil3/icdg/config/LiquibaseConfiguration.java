@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 import tech.jhipster.config.JHipsterConstants;
 import tech.jhipster.config.liquibase.AsyncSpringLiquibase;
 
+
 @Configuration
 public class LiquibaseConfiguration {
 

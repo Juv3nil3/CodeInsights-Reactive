@@ -16,8 +16,9 @@
 logging:
   level:
     ROOT: INFO
-    tech.jhipster: INFO
-    com.juv3nil3.icdg: INFO
+    tech.jhipster: DEBUG
+    org.hibernate.SQL: DEBUG
+    com.juv3nil3.icdg: DEBUG
 
 management:
   prometheus:
@@ -35,12 +36,12 @@ spring:
     uris: http://localhost:9200
   # Replace by 'prod, faker' to add the faker context and have sample data loaded in production
   liquibase:
-    contexts: prod
-    url: jdbc:postgresql://localhost:5433/icdg
+    url: jdbc:postgresql://localhost:5432/icdg
   r2dbc:
-    url: r2dbc:postgresql://localhost:5433/icdg
+    url: r2dbc:postgresql://localhost:5432/icdg
     username: icdg
     password:
+    driver-class-name: org.postgresql.Driver
   thymeleaf:
     cache: true
 

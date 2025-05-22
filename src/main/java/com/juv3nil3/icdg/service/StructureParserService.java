@@ -3,6 +3,8 @@ package com.juv3nil3.icdg.service;
 
 import com.juv3nil3.icdg.domain.*;
 import com.juv3nil3.icdg.repository.*;
+import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
+import jakarta.persistence.NonUniqueResultException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -56,6 +59,7 @@ public class StructureParserService {
     }
 
     private static final Logger log = LoggerFactory.getLogger(StructureParserService.class);
+    private static final String ROOT_PACKAGE = "com.example.MailAuditPro";
 
     private final ConcurrentHashMap<String, Mono<RepositoryMetadata>> repositoryLocks = new ConcurrentHashMap<>();
 
@@ -93,24 +97,16 @@ public class StructureParserService {
 
 
 
-
-
-
     public Mono<RepositoryMetadata> createOrUpdateRepositoryMetadata(String owner, String repoName) {
         LocalDateTime now = LocalDateTime.now();
+        UUID id = UUID.randomUUID();
 
-        return repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName)
-                .flatMap(existing -> {
-                    existing.setUpdatedAt(now);
-                    return repositoryMetadataRepository.save(existing);
-                })
-                .switchIfEmpty(
-                        repositoryMetadataRepository.save(new RepositoryMetadata(
-                                UUID.randomUUID(), owner, repoName, null, null, now, now
-                        ))
-                )
-                .doOnNext(repo -> log.info("✅ Saved RepositoryMetadata: id={}, name={}", repo.getId(), repo.getRepoName()));
+        return repositoryMetadataRepository
+                .insertIfNotExistsRepositoryMetadata(id, owner, repoName, now, now)
+                .then(repositoryMetadataRepository.findByOwnerAndRepoName(owner, repoName))
+                .doOnNext(repo -> log.info("✅ Loaded RepositoryMetadata: id={}, name={}", repo.getId(), repo.getRepoName()));
     }
+
 
 
 
@@ -121,14 +117,11 @@ public class StructureParserService {
         UUID id = UUID.randomUUID();
 
         return branchMetadataRepository
-                .mergeBranchMetadata(id, branchName, latestCommitSha, repo.getId(), now, now)
+                .insertIfNotExistsBranchMetadata(id, branchName, latestCommitSha, repo.getId(), now, now)
                 .then(branchMetadataRepository.findByBranchNameAndRepositoryMetadataId(branchName, repo.getId()))
-                .switchIfEmpty(
-                        branchMetadataRepository.save(new BranchMetadata(id, branchName, latestCommitSha, repo.getId(), now, now))
-                                .doOnNext(b -> log.info("✅ Fallback saved BranchMetadata: id={}, name={}", b.getId(), b.getBranchName()))
-                )
                 .doOnNext(branch -> log.info("📌 Using BranchMetadata: id={}, name={}", branch.getId(), branch.getBranchName()));
     }
+
 
 
 
@@ -316,42 +309,59 @@ public class StructureParserService {
 
 
     private String extractPackageName(String content) {
-
         if (content == null || content.isBlank()) return "default";
         Matcher matcher = Pattern.compile("^\\s*package\\s+([a-zA-Z0-9_.]+)\\s*;", Pattern.MULTILINE).matcher(content);
         return matcher.find() ? matcher.group(1).trim() : "default";
     }
 
 
-    private Mono<PackageData> getOrCreatePackage(String packageName, RepositoryMetadata repo, BranchMetadata branch) {
-        String effectiveName = (packageName == null || packageName.isBlank()) ? "default" : packageName;
+    private static final int ROOT_PACKAGE_DEPTH = 3; // e.g. com.example.MailAuditPro
 
-        return packageRepository.findByBranchIdAndPackageName(branch.getId(), effectiveName)
-                .doOnNext(found -> log.info("🔁 Found existing package: {}", found.getPackageName()))
-                .switchIfEmpty(Mono.defer(() -> {
-                    log.info("📦 Creating new package: {}", effectiveName);
+    private Mono<PackageData> getOrCreatePackage(String fullPackageName, RepositoryMetadata repo, BranchMetadata branch) {
+        String[] segments = fullPackageName.split("\\.");
 
-                    String parentName = extractParentPackage(effectiveName);
-                    Mono<PackageData> parentMono = (parentName != null)
-                            ? getOrCreatePackage(parentName, repo, branch)
-                            : Mono.justOrEmpty((PackageData) null);
+        if (segments.length < ROOT_PACKAGE_DEPTH) {
+            log.warn("Package {} has fewer segments than expected root depth: {}", fullPackageName, ROOT_PACKAGE_DEPTH);
+            return Mono.empty();
+        }
 
-                    return parentMono.flatMap(parentPkg -> {
-                        PackageData newPkg = new PackageData();
-                        newPkg.setId(UUID.randomUUID());
-                        newPkg.setPackageName(effectiveName);
-                        newPkg.setRepoName(repo.getRepoName());
-                        newPkg.setBranchId(branch.getId());
-                        if (parentPkg != null) {
-                            newPkg.setParentPackageId(parentPkg.getId());
-                        }
-                        return packageRepository.save(newPkg)
-                                .doOnNext(saved -> log.info("✅ Saved package: id={}, name={}", saved.getId(), saved.getPackageName()));
-                    });
-                }));
+        String rootPackageName = String.join(".", Arrays.copyOfRange(segments, 0, ROOT_PACKAGE_DEPTH));
+        String[] subPackages = Arrays.copyOfRange(segments, ROOT_PACKAGE_DEPTH, segments.length);
+
+        return ensureRootPackage(rootPackageName, branch, repo.getRepoName())
+                .flatMap(rootPackage -> {
+                    Mono<PackageData> current = Mono.just(rootPackage);
+                    StringBuilder fullNameBuilder = new StringBuilder(rootPackageName);
+
+                    for (String part : subPackages) {
+                        fullNameBuilder.append(".").append(part);
+                        String currentName = fullNameBuilder.toString();
+
+                        current = current.flatMap(parent -> {
+                            UUID childId = UUID.randomUUID();
+                            UUID parentId = parent.getId();
+                            UUID branchId = branch.getId();
+
+                            return packageRepository.insertIfNotExists(
+                                            childId, currentName, repo.getRepoName(), parentId, branchId)
+                                    .then(packageRepository.findByPackageNameAndParentPackageIdAndBranchId(currentName, parentId, branchId))
+                                    .doOnNext(pkg -> log.info("📦 Ensured child package: {}", currentName));
+                        });
+                    }
+
+                    return current;
+                });
     }
 
 
+    private Mono<PackageData> ensureRootPackage(String rootPackageName, BranchMetadata branch, String repoName) {
+        UUID id = UUID.randomUUID();
+        UUID branchId = branch.getId();
+
+        return packageRepository.insertIfNotExists(id, rootPackageName, repoName, null, branchId)
+                .then(packageRepository.findByPackageNameAndParentPackageIdIsNullAndBranchId(rootPackageName, branchId))
+                .doOnNext(pkg -> log.info("📦 Ensured root package: {}", rootPackageName));
+    }
 
     private String extractParentPackage(String packageName) {
         if (packageName == null || packageName.isBlank() || packageName.equals("default")) return null;

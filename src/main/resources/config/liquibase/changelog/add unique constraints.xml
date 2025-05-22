@@ -18,6 +18,13 @@
                 tableName="branch_metadata"
                 columnNames="branch_name, repository_metadata_id"
                 constraintName="uq_branch_repo"/>
+
+        <addUniqueConstraint
+                tableName="package_data"
+                columnNames="package_name, branch_id, parent_package_id"
+                constraintName="unique_package_path"/>
+
+
     </changeSet>
 
 </databaseChangeLog>

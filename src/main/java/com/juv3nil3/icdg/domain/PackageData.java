@@ -37,8 +37,14 @@ public class PackageData {
 
     public PackageData() {}
 
-    public PackageData(String packageName) {
+    public PackageData(UUID id, String packageName, String repoName, UUID parentPackageId, UUID branchId, PackageData parentPackage, List<PackageData> subPackages) {
+        this.id = id;
         this.packageName = packageName;
+        this.repoName = repoName;
+        this.parentPackageId = parentPackageId;
+        this.branchId = branchId;
+        this.parentPackage = parentPackage;
+        this.subPackages = subPackages;
     }
 
     // Getters and Setters
