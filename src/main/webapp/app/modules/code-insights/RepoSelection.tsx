@@ -10,7 +10,7 @@ const RepoSelection = () => {
 
   useEffect(() => {
     setLoading(true);
-    axios.get('/api/github/repos?language=Java').then(res => {
+    axios.get('/api/github/repos').then(res => {
       setRepos(res.data);
       setLoading(false);
     });
