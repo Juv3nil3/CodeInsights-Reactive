@@ -130,6 +130,10 @@ public class StructureParserService {
             log.info("Walking files for repo {} branch {}", repo.getRepoName(), branch.getBranchName());
             return Flux.fromStream(Files.walk(repoPath))
                     .filter(path -> path.toString().endsWith(".java"))
+                    .filter(path -> {
+                        Path relative = repoPath.relativize(path);
+                        return relative.toString().contains("src/main/");
+                    })
                     .flatMap(path -> parseAndSaveFile(path, repoPath, repo, branch))
                     .then();
         } catch (IOException e) {
@@ -137,6 +141,7 @@ public class StructureParserService {
             return Mono.error(new RuntimeException("Failed to walk repo path", e));
         }
     }
+
 
 
 
