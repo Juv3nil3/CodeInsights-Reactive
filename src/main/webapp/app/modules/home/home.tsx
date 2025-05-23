@@ -1,4 +1,6 @@
 import './home.scss';
+import RepoSelection from 'app/modules/code-insights/RepoSelection';
+
 
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -27,70 +29,29 @@ export const Home = () => {
         <span className="hipster rounded" />
       </Col>
       <Col md="9">
-        <h1 className="display-4">Welcome, Java Hipster!</h1>
-        <p className="lead">This is your homepage</p>
+        <h1 className="display-4">Welcome to Code Insights!</h1>
+        <p className="lead">Generate Documentation for Your Java Repositories in few clicks</p>
+
         {account?.login ? (
-          <div>
+          <>
             <Alert color="success">You are logged in as user &quot;{account.login}&quot;.</Alert>
-          </div>
+            <RepoSelection />
+          </>
         ) : (
-          <div>
-            <Alert color="warning">
-              If you want to
-              <span>&nbsp;</span>
-              <a
-                className="alert-link"
-                onClick={() =>
-                  navigate(getLoginUrl(), {
-                    state: { from: pageLocation },
-                  })
-                }
-              >
-                sign in
-              </a>
-              , you can try the default accounts:
-              <br />- Administrator (login=&quot;admin&quot; and password=&quot;admin&quot;) <br />- User (login=&quot;user&quot; and
-              password=&quot;user&quot;).
-            </Alert>
-          </div>
+          <Alert color="warning">
+            <a
+              className="alert-link"
+              onClick={() =>
+                navigate(getLoginUrl(), {
+                  state: { from: pageLocation },
+                })
+              }
+            >
+              Login with your GitHub account
+            </a>{' '}
+            to get started.
+          </Alert>
         )}
-        <p>If you have any question on JHipster:</p>
-
-        <ul>
-          <li>
-            <a href="https://www.jhipster.tech/" target="_blank" rel="noopener noreferrer">
-              JHipster homepage
-            </a>
-          </li>
-          <li>
-            <a href="https://stackoverflow.com/tags/jhipster/info" target="_blank" rel="noopener noreferrer">
-              JHipster on Stack Overflow
-            </a>
-          </li>
-          <li>
-            <a href="https://github.com/jhipster/generator-jhipster/issues?state=open" target="_blank" rel="noopener noreferrer">
-              JHipster bug tracker
-            </a>
-          </li>
-          <li>
-            <a href="https://gitter.im/jhipster/generator-jhipster" target="_blank" rel="noopener noreferrer">
-              JHipster public chat room
-            </a>
-          </li>
-          <li>
-            <a href="https://twitter.com/jhipster" target="_blank" rel="noopener noreferrer">
-              follow @jhipster on Twitter
-            </a>
-          </li>
-        </ul>
-
-        <p>
-          If you like JHipster, don&apos;t forget to give us a star on{' '}
-          <a href="https://github.com/jhipster/generator-jhipster" target="_blank" rel="noopener noreferrer">
-            GitHub
-          </a>
-          !
-        </p>
       </Col>
     </Row>
   );
