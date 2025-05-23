@@ -14,12 +14,11 @@ import java.util.UUID;
 public interface RepositoryMetadataRepo extends R2dbcRepository<RepositoryMetadata, UUID> {
 
     @Query("""
-    INSERT INTO repository_metadata (id, owner, repo_name, created_at, updated_at)
-    VALUES (:id, :owner, :repoName, :createdAt, :updatedAt)
+    INSERT INTO repository_metadata (owner, repo_name, created_at, updated_at)
+    VALUES (:owner, :repoName, :createdAt, :updatedAt)
     ON CONFLICT (owner, repo_name) DO NOTHING
 """)
     Mono<Void> insertIfNotExistsRepositoryMetadata(
-            @Param("id") UUID id,
             @Param("owner") String owner,
             @Param("repoName") String repoName,
             @Param("createdAt") LocalDateTime createdAt,

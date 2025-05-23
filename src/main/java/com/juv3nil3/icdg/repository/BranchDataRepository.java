@@ -16,12 +16,11 @@ import java.util.UUID;
 public interface BranchDataRepository extends R2dbcRepository<BranchMetadata, UUID> {
 
     @Query("""
-    INSERT INTO branch_metadata (id, branch_name, latest_commit_hash, repository_metadata_id, created_at, updated_at)
-    VALUES (:id, :branchName, :latestCommitHash, :repositoryMetadataId, :createdAt, :updatedAt)
+    INSERT INTO branch_metadata (branch_name, latest_commit_hash, repository_metadata_id, created_at, updated_at)
+    VALUES (:branchName, :latestCommitHash, :repositoryMetadataId, :createdAt, :updatedAt)
     ON CONFLICT (branch_name, repository_metadata_id) DO NOTHING
 """)
     Mono<Void> insertIfNotExistsBranchMetadata(
-            @Param("id") UUID id,
             @Param("branchName") String branchName,
             @Param("latestCommitHash") String latestCommitHash,
             @Param("repositoryMetadataId") UUID repositoryMetadataId,

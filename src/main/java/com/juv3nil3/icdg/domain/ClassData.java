@@ -1,12 +1,15 @@
 package com.juv3nil3.icdg.domain;
 
 import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
 public class ClassData{
+
     @Id
     private UUID id;
 

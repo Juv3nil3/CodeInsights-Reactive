@@ -1,7 +1,8 @@
 package com.juv3nil3.icdg.domain;
 
-import com.juv3nil3.icdg.domain.elasticsearch.ClassDataDocument;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

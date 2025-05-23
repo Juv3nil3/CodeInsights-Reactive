@@ -4,9 +4,13 @@
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
     <changeSet id="003" author="juv3nil3">
+
+        <!-- Enable uuid-ossp extension (required for uuid_generate_v4) -->
+        <sql dbms="postgresql">CREATE EXTENSION IF NOT EXISTS "uuid-ossp";</sql>
+
         <!-- REPO -->
         <createTable tableName="repository_metadata">
-            <column name="id" type="UUID">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="owner" type="VARCHAR(255)"/>
@@ -19,7 +23,7 @@
 
         <!-- BRANCH -->
         <createTable tableName="branch_metadata">
-            <column name="id" type="UUID">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="branch_name" type="VARCHAR(255)"/>
@@ -31,7 +35,7 @@
 
         <!-- FILE -->
         <createTable tableName="file_data">
-            <column name="id" type="UUID">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="file_name" type="VARCHAR(255)"/>
@@ -41,8 +45,9 @@
         </createTable>
 
         <!-- PACKAGE -->
+
         <createTable tableName="package_data">
-            <column name="id" type="UUID">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="package_name" type="VARCHAR(255)">
@@ -55,7 +60,7 @@
 
         <!-- documentation table -->
         <createTable tableName="documentation">
-            <column name="id" type="UUID">
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="branch_metadata_id" type="UUID"/>
@@ -71,8 +76,8 @@
         </createTable>
 
         <!-- BRANCH-FILE ASSOCIATION -->
-        <createTable tableName="branch_file_association">
-            <column name="id" type="UUID">
+        <createTable tableName="branch_file_association" >
+            <column name="id" type="UUID" defaultValueComputed="uuid_generate_v4()">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="repo_name" type="VARCHAR(255)"/>

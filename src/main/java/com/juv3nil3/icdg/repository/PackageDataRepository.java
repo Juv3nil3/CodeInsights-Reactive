@@ -30,15 +30,23 @@ public interface PackageDataRepository extends R2dbcRepository<PackageData, UUID
 
 
     @Query("""
-    INSERT INTO package_data (id, package_name, repo_name, parent_package_id, branch_id)
-    VALUES (:id, :packageName, :repoName, :parentPackageId, :branchId)
+    INSERT INTO package_data (package_name, repo_name, parent_package_id, branch_id)
+    VALUES (:packageName, :repoName, :parentPackageId, :branchId)
     ON CONFLICT (package_name, parent_package_id, branch_id) DO NOTHING
 """)
     Mono<Void> insertIfNotExists(
-            @Param("id") UUID id,
             @Param("packageName") String packageName,
             @Param("repoName") String repoName,
             @Param("parentPackageId") UUID parentPackageId,
             @Param("branchId") UUID branchId
     );
+
+    @Query("""
+    INSERT INTO package_data (id, package_name, repo_name, parent_package_id, branch_id)
+    VALUES (:id, :packageName, :repoName, NULL, :branchId)
+    ON CONFLICT (id) DO NOTHING
+""")
+    Mono<Void> insertRootPackage(UUID id, String packageName, String repoName, UUID branchId);
+
+
 }
