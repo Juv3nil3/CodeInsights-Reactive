@@ -2,12 +2,15 @@ package com.juv3nil3.icdg.domain.elasticsearch;
 
 
 import lombok.Builder;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.List;
 
 @Builder
 public class FileDataDocument {
     private String filePath;
+    @Field(type = FieldType.Nested)
     private List<ClassDataDocument> classes;
 
 

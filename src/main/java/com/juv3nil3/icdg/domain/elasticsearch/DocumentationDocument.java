@@ -3,6 +3,8 @@ package com.juv3nil3.icdg.domain.elasticsearch;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +21,7 @@ public class DocumentationDocument {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @Field(type = FieldType.Nested)
     private List<PackageDataDocument> packages;
 
     // Getters and Setters

@@ -1,6 +1,8 @@
 package com.juv3nil3.icdg.domain.elasticsearch;
 
 import lombok.Builder;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.List;
 
@@ -8,6 +10,8 @@ import java.util.List;
 public class PackageDataDocument {
 
     private String packageName;
+
+    @Field(type = FieldType.Nested)
     private List<FileDataDocument> files;
 
     public PackageDataDocument() {

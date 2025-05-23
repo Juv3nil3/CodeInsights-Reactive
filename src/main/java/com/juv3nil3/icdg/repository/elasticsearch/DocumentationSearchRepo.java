@@ -12,7 +12,8 @@ public interface DocumentationSearchRepo extends ElasticsearchRepository<Documen
     Iterable<DocumentationDocument> findByBranchMetadataId(Long branchMetadataId);
 
 
-    @Query("{\"nested\": {\"path\": \"packages.classes\", \"query\": {\"match\": {\"packages.classes.className\": \"UserService\"}}}}")
-    List<DocumentationDocument> findByClassName(String className);
+    List<DocumentationDocument> findByPackagesFilesClassesClassName(String className);
+
+
 
 }
