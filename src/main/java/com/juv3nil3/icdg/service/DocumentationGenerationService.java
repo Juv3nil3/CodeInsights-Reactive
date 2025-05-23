@@ -85,20 +85,26 @@ public class DocumentationGenerationService {
         log.debug("Regenerating documentation for repoId={}, branchId={}", repo.getId(), branch.getId());
 
         return documentationRepository.findByBranchMetadataId(branch.getId())
-                .defaultIfEmpty(new Documentation())
-                .flatMap(existingDoc ->
+                .flatMap(existingDoc -> {
+                    // Update existing
+                    return documentationBuilderService.buildDocumentation(repo, branch)
+                            .doOnNext(doc -> log.debug("Built new doc for branchId={}", branch.getId()))
+                            .flatMap(builtDoc -> {
+                                builtDoc.setId(existingDoc.getId()); // Preserve ID
+                                builtDoc.setCreatedAt(existingDoc.getCreatedAt()); // Preserve created time
+                                builtDoc.setUpdatedAt(LocalDateTime.now());
+                                return documentationRepository.save(builtDoc);
+                            });
+                })
+                .switchIfEmpty(
                         documentationBuilderService.buildDocumentation(repo, branch)
-                                .doOnNext(generatedDoc -> log.debug("Generated new documentation for branchId={}", branch.getId()))
-                                .flatMap(generatedDoc -> {
-                                    generatedDoc.setId(existingDoc.getId()); // Retain ID for update
-                                    generatedDoc.setCreatedAt(existingDoc.getCreatedAt() != null
-                                            ? existingDoc.getCreatedAt()
-                                            : LocalDateTime.now());
-                                    generatedDoc.setUpdatedAt(LocalDateTime.now());
-                                    log.debug("Saving documentation for branchId={} (isNew={})", branch.getId(), existingDoc.getId() == null);
-                                    return documentationRepository.save(generatedDoc);
+                                .doOnNext(doc -> log.debug("Built first-time doc for branchId={}", branch.getId()))
+                                .flatMap(builtDoc -> {
+                                    builtDoc.setUpdatedAt(LocalDateTime.now()); // createdAt already set
+                                    return documentationRepository.save(builtDoc);
                                 })
-                );
+                )
+                .doOnNext(saved -> log.debug("📄 Saved documentation for branchId={} with ID={}", branch.getId(), saved.getId()));
     }
 
 }

@@ -33,10 +33,6 @@ public class DocumentationBuilderService {
 
     public Mono<Documentation> buildDocumentation(RepositoryMetadata repo, BranchMetadata branchMetadata) {
         Documentation documentation = new Documentation();
-
-        // Generate and set UUID for id
-        documentation.setId(UUID.randomUUID());
-
         documentation.setBranchMetadataId(branchMetadata.getId());
         documentation.setCreatedAt(LocalDateTime.now());
         documentation.setUpdatedAt(LocalDateTime.now());
@@ -47,16 +43,16 @@ public class DocumentationBuilderService {
                 .flatMap(packages -> {
                     documentation.setPackages(packages);
 
-                    // Hydrate fileAssociations for each package
-                    return Flux.fromIterable(packages)
-                            .flatMap(pkg ->
-                                    branchFileAssociationRepository.findAllByPackageDataId(pkg.getId())
-                                            .collectList()
-                                            .doOnNext(pkg::setFileAssociations)
-                            )
-                            .then(Mono.just(documentation)); // Wait for all hydration to complete
-                })
-                .flatMap(documentationRepository::save); // Save only after everything is ready
+                    return Mono.when(
+                            Flux.fromIterable(packages)
+                                    .flatMap(pkg ->
+                                            branchFileAssociationRepository.findAllByPackageDataId(pkg.getId())
+                                                    .collectList()
+                                                    .doOnNext(pkg::setFileAssociations)
+                                    )
+                    ).thenReturn(documentation); // correct Mono return
+                });
     }
+
 
 }
