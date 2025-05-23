@@ -33,8 +33,12 @@ public class DocumentationController {
     ) {
         return githubTokenService.fetchGithubTokenFromKeycloak(authorizationHeader)
                 .flatMap(token ->
-                        documentationService.generateIfNecessary(owner, repoName, branchName, token)
-                );
+                        documentationService.generateIfNecessary(owner, repoName, branchName, token) // returns Mono<UUID> (documentationId)
+                )
+                .flatMap(documentationService::fetchFullDocumentation // returns Mono<Documentation>
+                )
+                .map(documentationMapper::toDto);
     }
+
 
 }

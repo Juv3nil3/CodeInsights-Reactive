@@ -19,5 +19,6 @@ public interface FileDataRepository extends R2dbcRepository<FileData, UUID> {
 
     Flux<FileData> findAllByRepoName(String repoName);
     Mono<FileData> findByFilePathAndRepoName(String filePath, String repoName);
+    Mono<FileData> findById(UUID fileId);
 
 }

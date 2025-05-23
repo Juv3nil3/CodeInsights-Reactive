@@ -18,4 +18,6 @@ public interface DocumentationRepository extends R2dbcRepository<Documentation, 
 
     Mono<Documentation> findByBranchMetadataId(UUID branchMetadataId);
 
+    Mono<Documentation> findById(UUID id);
+
 }
