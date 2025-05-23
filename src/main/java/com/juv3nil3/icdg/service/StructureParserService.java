@@ -227,25 +227,26 @@ public class StructureParserService {
         List<MethodData> methods = clazz.getMethods() != null ? clazz.getMethods() : Collections.emptyList();
         List<AnnotationData> annotations = clazz.getAnnotations() != null ? clazz.getAnnotations() : Collections.emptyList();
 
-        for (FieldData field : fields) {
-            field.setClassDataId(clazz.getId());
-        }
-        for (MethodData method : methods) {
-            method.setClassDataId(clazz.getId());
-        }
-
         return classRepository.save(clazz)
                 .doOnNext(c -> log.info("✅ Saved ClassData: id={}, name={}", c.getId(), c.getName()))
                 .flatMap(savedClass -> {
+                    // 🔁 Assign class ID after it is generated
+                    for (FieldData field : fields) {
+                        field.setClassDataId(savedClass.getId());
+                    }
+                    for (MethodData method : methods) {
+                        method.setClassDataId(savedClass.getId());
+                    }
+
                     // Mono<Void> saveClassAnnotations = saveAnnotations(annotations, savedClass.getId(), null, null);
                     Mono<Void> saveFieldsMono = saveFieldData(fields);
                     Mono<Void> saveMethodsMono = saveMethodData(methods);
 
-                    // Skip annotation save for testing
                     return Mono.when(/*saveClassAnnotations,*/ saveFieldsMono, saveMethodsMono)
                             .thenReturn(savedClass);
                 });
     }
+
 
     private Mono<Void> saveFieldData(List<FieldData> fields) {
         if (fields.isEmpty()) {
