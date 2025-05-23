@@ -1,7 +1,10 @@
 package com.juv3nil3.icdg.domain.elasticsearch;
 
+import lombok.Builder;
+
 import java.util.List;
 
+@Builder
 public class MethodDataDocument {
 
     private String methodName;

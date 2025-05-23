@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Document(indexName = "documentation")
 @Builder
@@ -16,7 +17,7 @@ public class DocumentationDocument {
     @Id
     private String id;
 
-    private Long branchMetadataId;
+    private UUID branchMetadataId;
     private String exportPath;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -34,11 +35,11 @@ public class DocumentationDocument {
         this.id = id;
     }
 
-    public Long getBranchMetadataId() {
+    public UUID getBranchMetadataId() {
         return branchMetadataId;
     }
 
-    public void setBranchMetadataId(Long branchMetadataId) {
+    public void setBranchMetadataId(UUID branchMetadataId) {
         this.branchMetadataId = branchMetadataId;
     }
 
