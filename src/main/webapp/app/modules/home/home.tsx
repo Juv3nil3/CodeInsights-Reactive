@@ -19,7 +19,7 @@ export const Home = () => {
     const redirectURL = localStorage.getItem(REDIRECT_URL);
     if (redirectURL) {
       localStorage.removeItem(REDIRECT_URL);
-      location.href = `${location.origin}${redirectURL}`;
+      location.href = ${location.origin}${redirectURL};
     }
   });
 

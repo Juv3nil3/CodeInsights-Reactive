@@ -17,7 +17,21 @@ const ToggleSection = ({ title, children, defaultExpanded = true }: any) => {
   );
 };
 
-
+const DocumentationStats = ({ stats }: { stats: any }) => {
+  if (!stats) return null;
+  return (
+    <div className="p-3 text-light bg-dark rounded shadow-sm" style={{ minWidth: '220px' }}>
+      <h5 className="text-success mb-3">📊 Stats</h5>
+      <ul className="list-unstyled small">
+        <li>📦 Packages: <strong>{stats.totalPackages}</strong></li>
+        <li>📄 Files: <strong>{stats.totalFiles}</strong></li>
+        <li>📘 Classes: <strong>{stats.totalClasses}</strong></li>
+        <li>🔧 Methods: <strong>{stats.totalMethods}</strong></li>
+        <li>🧩 Fields: <strong>{stats.totalFields}</strong></li>
+      </ul>
+    </div>
+  );
+};
 
 const DocumentationViewer = ({ data }: { data: any }) => {
   if (!data) return null;
@@ -91,21 +105,27 @@ const DocumentationViewer = ({ data }: { data: any }) => {
   };
 
   return (
-    <div className="p-4 rounded shadow-sm" style={{ backgroundColor: '#1e1e1e', color: '#ffffff' }}>
-      <h2 className="mb-3 text-success">📙 {data.repoName}</h2>
-      <p>
-        <strong>Owner:</strong> {data.owner} | <strong>Branch:</strong> {data.branchName}
-      </p>
-      <p className="text-muted">
-        Created: {new Date(data.createdAt).toLocaleString()} | Updated: {new Date(data.updatedAt).toLocaleString()}
-      </p>
+      <div className="d-flex gap-4 p-4" style={{ backgroundColor: '#1e1e1e', color: '#ffffff' }}>
+        {/* Sidebar: Statistics */}
+        <DocumentationStats stats={data.statistics} />
 
-      <div className="mt-4">
-        <h4 className="text-primary">📂 Packages</h4>
-        {renderPackages(data.packages)}
+        {/* Main Content: Documentation Tree */}
+        <div className="flex-grow-1">
+          <h2 className="mb-3 text-success">📙 {data.repoName}</h2>
+          <p>
+            <strong>Owner:</strong> {data.owner} | <strong>Branch:</strong> {data.branchName}
+          </p>
+          <p className="text-muted">
+            Created: {new Date(data.createdAt).toLocaleString()} | Updated: {new Date(data.updatedAt).toLocaleString()}
+          </p>
+
+          <div className="mt-4">
+            <h4 className="text-primary">📂 Packages</h4>
+            {renderPackages(data.packages)}
+          </div>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export default DocumentationViewer;
