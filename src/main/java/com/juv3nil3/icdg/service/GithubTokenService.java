@@ -31,7 +31,7 @@ public class GithubTokenService {
 
         return webClient.get()
                 .uri(githubTokenUrl)
-                .header(HttpHeaders.AUTHORIZATION, keycloakAccessToken)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + keycloakAccessToken)
                 .retrieve()
                 .bodyToMono(String.class)
                 .doOnNext(body -> log.debug("Keycloak token exchange response: {}", body))

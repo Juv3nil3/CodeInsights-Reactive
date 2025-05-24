@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FormGroup, Label, Input, Button, Spinner } from 'reactstrap';
+import { Spinner } from 'reactstrap';
 import BranchSelection from './BranchSelection';
 
 const RepoSelection = () => {
@@ -13,34 +13,43 @@ const RepoSelection = () => {
     axios.get('/api/github/repos').then(res => {
       setRepos(res.data);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   return (
     <div className="mt-4">
       <h4>Select a Java Repository</h4>
-      {loading ? (
-        <Spinner />
-      ) : (
-        <FormGroup>
-          <Label for="repoSelect">Repository</Label>
-          <Input
-            type="select"
-            id="repoSelect"
-            onChange={e => setSelectedRepo(e.target.value)}
-            value={selectedRepo || ''}
-          >
-            <option value="">-- Select --</option>
-            {repos.map(repo => (
-              <option key={repo} value={repo}>
-                {repo}
-              </option>
-            ))}
-          </Input>
-        </FormGroup>
+      {loading && <Spinner />}
+      {!loading && repos.length === 0 && <p>No repositories found</p>}
+
+      {!loading && repos.length > 0 && (
+        <div>
+          {repos.map(repo => (
+            <button
+              key={repo}
+              onClick={() => setSelectedRepo(repo)}
+              style={{
+                margin: '5px',
+                padding: '8px 12px',
+                cursor: 'pointer',
+                backgroundColor: selectedRepo === repo ? '#007bff' : '#f0f0f0',
+                color: selectedRepo === repo ? 'white' : 'black',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+              }}
+            >
+              {repo}
+            </button>
+          ))}
+        </div>
       )}
 
-      {selectedRepo && <BranchSelection repo={selectedRepo} />}
+      {selectedRepo && (
+        <div className="mt-4">
+          <h5>Branches for: {selectedRepo}</h5>
+          <BranchSelection repo={selectedRepo} />
+        </div>
+      )}
     </div>
   );
 };
