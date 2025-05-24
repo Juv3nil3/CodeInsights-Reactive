@@ -1,4 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+const ToggleSection = ({ title, children, defaultExpanded = true }: any) => {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
+  return (
+    <div className="ms-2">
+      <div
+        className="cursor-pointer fw-bold mb-1"
+        onClick={() => setExpanded(!expanded)}
+        style={{ userSelect: 'none' }}
+      >
+        {expanded ? '🔽' : '▶️'} {title}
+      </div>
+      {expanded && <div className="ms-3">{children}</div>}
+    </div>
+  );
+};
 
 const DocumentationViewer = ({ data }: { data: any }) => {
   if (!data) return null;
@@ -12,61 +29,62 @@ const DocumentationViewer = ({ data }: { data: any }) => {
     );
   };
 
-  const renderFields = (fields: any[]) => {
-    return fields.map((field, i) => (
-      <li key={i} className="ms-3 text-light">
-        🧩 <strong>{field.name}</strong>
-        {renderComment(field.comment)}
-      </li>
-    ));
-  };
+  const renderFields = (fields: any[]) => (
+    <ul>
+      {fields.map((field, i) => (
+        <li key={i} className="text-light">
+          🧩 <strong>{field.name}</strong>
+          {renderComment(field.comment)}
+        </li>
+      ))}
+    </ul>
+  );
 
-  const renderMethods = (methods: any[]) => {
-    return methods.map((method, i) => (
-      <li key={i} className="ms-3 text-light">
-        🔧 <strong>{method.name}</strong>
-        {renderComment(method.comment)}
-      </li>
-    ));
-  };
+  const renderMethods = (methods: any[]) => (
+    <ul>
+      {methods.map((method, i) => (
+        <li key={i} className="text-light">
+          🔧 <strong>{method.name}</strong>
+          {renderComment(method.comment)}
+        </li>
+      ))}
+    </ul>
+  );
 
   const renderClasses = (classes: any[]) => {
     return classes.map((cls, i) => (
-      <div key={i} className="ms-3 mt-3 text-light">
-        <h6 className="text-info">📘 Class: <strong>{cls.name}</strong></h6>
+      <ToggleSection key={i} title={`📘 Class: ${cls.name}`}>
         {renderComment(cls.comment)}
         {cls.fields?.length > 0 && (
           <>
             <div className="fw-bold mt-2">Fields:</div>
-            <ul>{renderFields(cls.fields)}</ul>
+            {renderFields(cls.fields)}
           </>
         )}
         {cls.methods?.length > 0 && (
           <>
             <div className="fw-bold mt-2">Methods:</div>
-            <ul>{renderMethods(cls.methods)}</ul>
+            {renderMethods(cls.methods)}
           </>
         )}
-      </div>
+      </ToggleSection>
     ));
   };
 
   const renderFiles = (files: any[]) => {
     return files.map((file, i) => (
-      <div key={i} className="ms-3 text-light">
-        <div className="fw-bold">📄 {file.fileName || 'Unnamed File'}</div>
+      <ToggleSection key={i} title={`📄 ${file.fileName || 'Unnamed File'}`} defaultExpanded={false}>
         {renderClasses(file.classes)}
-      </div>
+      </ToggleSection>
     ));
   };
 
   const renderPackages = (packages: any[], level = 0) => {
     return packages.map((pkg, i) => (
-      <div key={i} className={`ms-${level * 3} mt-3`}>
-        <h5 className="text-warning">📦 {pkg.packageName}</h5>
+      <ToggleSection key={i} title={`📦 ${pkg.packageName}`} defaultExpanded={false}>
         {pkg.files && renderFiles(pkg.files)}
         {pkg.subPackages && renderPackages(pkg.subPackages, level + 1)}
-      </div>
+      </ToggleSection>
     ));
   };
 
