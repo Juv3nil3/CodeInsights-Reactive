@@ -3,6 +3,7 @@ package com.juv3nil3.icdg.web.rest;
 import com.juv3nil3.icdg.domain.elasticsearch.DocumentationDocument;
 import com.juv3nil3.icdg.repository.elasticsearch.DocumentationSearchRepo;
 import com.juv3nil3.icdg.service.DocumentationGenerationService;
+import com.juv3nil3.icdg.service.GitMetadataExtractor;
 import com.juv3nil3.icdg.service.GithubTokenService;
 import com.juv3nil3.icdg.service.KeycloakTokenService;
 import com.juv3nil3.icdg.service.dto.DocumentationDTO;
@@ -26,41 +27,45 @@ public class DocumentationController {
     private final DocumentationElasticMapper documentationElasticMapper;
     private final DocumentationSearchRepo documentationSearchRepo;
     private final KeycloakTokenService keycloakTokenService;
+    private final GitMetadataExtractor gitMetadataExtractor;
 
     private static Logger log = LoggerFactory.getLogger(DocumentationController.class);
 
     @Autowired
-    public DocumentationController(DocumentationGenerationService documentationService, DocumentationMapper documentationMapper, GithubTokenService githubTokenService, DocumentationElasticMapper documentationElasticMapper, DocumentationSearchRepo documentationSearchRepo, KeycloakTokenService keycloakTokenService) {
+    public DocumentationController(DocumentationGenerationService documentationService, DocumentationMapper documentationMapper, GithubTokenService githubTokenService, DocumentationElasticMapper documentationElasticMapper, DocumentationSearchRepo documentationSearchRepo, KeycloakTokenService keycloakTokenService, GitMetadataExtractor gitMetadataExtractor) {
         this.documentationService = documentationService;
         this.documentationMapper = documentationMapper;
         this.githubTokenService = githubTokenService;
         this.documentationElasticMapper = documentationElasticMapper;
         this.documentationSearchRepo = documentationSearchRepo;
         this.keycloakTokenService = keycloakTokenService;
+        this.gitMetadataExtractor = gitMetadataExtractor;
     }
 
     @GetMapping("/generate")
     public Mono<DocumentationDTO> generateDocumentation(
-            @RequestParam String owner,
             @RequestParam String repoName,
             @RequestParam String branchName
     ) {
         return keycloakTokenService.getAccessToken()
-                .flatMap(githubTokenService::fetchGithubTokenFromKeycloak
-                )
+                .flatMap(githubTokenService::fetchGithubTokenFromKeycloak)
                 .flatMap(githubToken ->
-                        documentationService.generateIfNecessary(owner, repoName, branchName, githubToken)
+                        gitMetadataExtractor.fetchGitHubUsername(githubToken) // fetch the owner using GitHub API
+                                .flatMap(owner ->
+                                        documentationService.generateIfNecessary(owner, repoName, branchName, githubToken)
+                                                .flatMap(documentationService::fetchFullDocumentation)
+                                                .flatMap(documentation -> {
+                                                    DocumentationDocument docDocument = documentationElasticMapper.toDocument(documentation);
+                                                    return Mono.fromCallable(() -> documentationSearchRepo.save(docDocument))
+                                                            .subscribeOn(Schedulers.boundedElastic())
+                                                            .doOnSuccess(saved -> log.info("✅ Indexed Documentation in Elasticsearch: ID = {}", saved.getId()))
+                                                            .thenReturn(documentation);
+                                                })
+                                )
                 )
-                .flatMap(documentationService::fetchFullDocumentation)
-                .flatMap(documentation -> {
-                    DocumentationDocument docDocument = documentationElasticMapper.toDocument(documentation);
-                    return Mono.fromCallable(() -> documentationSearchRepo.save(docDocument))
-                            .subscribeOn(Schedulers.boundedElastic())
-                            .doOnSuccess(saved -> log.info("✅ Indexed Documentation in Elasticsearch: ID = {}", saved.getId()))
-                            .thenReturn(documentation);
-                })
                 .map(documentationMapper::toDto);
     }
+
 
 
 

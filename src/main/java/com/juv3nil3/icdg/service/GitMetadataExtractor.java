@@ -7,7 +7,11 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -17,6 +21,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class GitMetadataExtractor {
+
+    private final WebClient webClient;
+
+    public GitMetadataExtractor(WebClient.Builder webClientBuilder,
+                            @Value("${github.api.base-url:https://api.github.com}") String githubApiBaseUrl) {
+        this.webClient = webClientBuilder.baseUrl(githubApiBaseUrl).build();
+    }
 
     public static String getLatestCommitSha(Path repoPath, String branchName) throws IOException {
         try (Repository repository = new FileRepositoryBuilder()
@@ -53,4 +64,26 @@ public class GitMetadataExtractor {
     public static String getCommitMessage(RevCommit commit) {
         return commit.getFullMessage();
     }
+
+    public Mono<String> fetchGitHubUsername(String githubToken) {
+        return webClient.get()
+                .uri("/user")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + githubToken)
+                .retrieve()
+                .bodyToMono(GitHubUser.class)
+                .map(GitHubUser::getLogin);
+    }
+
+    public static class GitHubUser {
+        private String login;
+
+        public String getLogin() {
+            return login;
+        }
+
+        public void setLogin(String login) {
+            this.login = login;
+        }
+    }
+
 }
