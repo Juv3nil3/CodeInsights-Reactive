@@ -2,6 +2,7 @@ package com.juv3nil3.icdg.web.rest;
 
 
 import com.juv3nil3.icdg.service.GithubTokenService;
+import com.juv3nil3.icdg.service.dto.GitHubRepoPojo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -54,7 +50,7 @@ public class GithubController {
                                                 .uri("/user/repos?per_page=100")
                                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + githubToken)
                                                 .retrieve()
-                                                .bodyToFlux(GitHubRepo.class)
+                                                .bodyToFlux(GitHubRepoPojo.class)
                                                 .doOnNext(repo -> log.info("📦 Repo: {} (Language: {})", repo.getName(), repo.getLanguage()))
                                 )
                 )
@@ -65,11 +61,65 @@ public class GithubController {
                     }
                     return isJava;
                 })
-                .map(GitHubRepo::getName)
+                .map(GitHubRepoPojo::getName)
                 .collectList()
                 .doOnSuccess(names -> log.info("🎯 Final Java Repositories List: {}", names));
     }
 
+
+    @GetMapping("/repos/{repo}/branches")
+    public Mono<List<String>> getBranches(@PathVariable String repo) {
+        return getAccessToken()
+                .doOnNext(keycloakToken -> log.info("🔑 Keycloak Access Token: {}", keycloakToken))
+                .flatMap(keycloakToken ->
+                        githubTokenService.fetchGithubTokenFromKeycloak(keycloakToken)
+                                .doOnNext(githubToken -> log.info("🐙 GitHub Access Token: {}", githubToken))
+                                .flatMap(githubToken ->
+                                        webClient.get()
+                                                .uri("/user")
+                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + githubToken)
+                                                .retrieve()
+                                                .bodyToMono(GitHubUser.class)
+                                                .map(GitHubUser::getLogin)
+                                                .flatMap(username ->
+                                                        webClient.get()
+                                                                .uri("/repos/{owner}/{repo}/branches", username, repo)
+                                                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + githubToken)
+                                                                .retrieve()
+                                                                .bodyToFlux(GitHubBranch.class)
+                                                                .doOnNext(branch -> log.info("🌿 Branch: {}", branch.getName()))
+                                                                .map(GitHubBranch::getName)
+                                                                .collectList()
+                                                )
+                                )
+                )
+                .doOnSuccess(list -> log.info("✅ Branches fetched for repo: {}", repo));
+    }
+
+
+    public static class GitHubUser {
+        private String login; // GitHub username
+
+        public String getLogin() {
+            return login;
+        }
+
+        public void setLogin(String login) {
+            this.login = login;
+        }
+    }
+
+    public static class GitHubBranch {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 
     @GetMapping("/token")
     public Mono<String> token() {
@@ -78,31 +128,6 @@ public class GithubController {
                 .map(token -> "Bearer " + token);
     }
 
-
-
-
-
-
-    // Minimal POJO to deserialize GitHub repo objects
-    public static class GitHubRepo {
-        private String name;
-        private String language;
-
-        // Getters and setters
-        public String getName() {
-            return name;
-        }
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getLanguage() {
-            return language;
-        }
-        public void setLanguage(String language) {
-            this.language = language;
-        }
-    }
 
 
     public Mono<String> getAccessToken() {
