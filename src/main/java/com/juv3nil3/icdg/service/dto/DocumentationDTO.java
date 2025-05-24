@@ -14,6 +14,7 @@ public class DocumentationDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<PackageDTO> packages;
+    private StatisticsDTO statistics;
 
     public List<PackageDTO> getPackages() {
         return packages;
@@ -69,5 +70,13 @@ public class DocumentationDTO {
 
     public void setRepoName(String repoName) {
         this.repoName = repoName;
+    }
+
+    public StatisticsDTO getStatistics() {
+        return statistics;
+    }
+
+    public void setStatistics(StatisticsDTO statistics) {
+        this.statistics = statistics;
     }
 }

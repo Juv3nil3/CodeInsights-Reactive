@@ -46,9 +46,15 @@ public class DocumentationMapper {
                 .collect(Collectors.toList());
 
         dto.setPackages(rootPackages);
+
+        // 🔢 Compute statistics
+        StatisticsDTO stats = computeStatistics(allPackages);
+        dto.setStatistics(stats);
+
         log.info("✅ Mapped documentation DTO with {} root packages", rootPackages.size());
         return dto;
     }
+
 
     private PackageDTO toPackageDto(PackageData pkg, Map<UUID, List<PackageData>> parentMap) {
         log.debug("➡️ Mapping package: {}", pkg.getPackageName());
@@ -135,4 +141,40 @@ public class DocumentationMapper {
         dto.setComment(field.getComment());
         return dto;
     }
+
+    private StatisticsDTO computeStatistics(List<PackageData> allPackages) {
+        int totalFiles = 0;
+        int totalClasses = 0;
+        int totalMethods = 0;
+        int totalFields = 0;
+
+        for (PackageData pkg : allPackages) {
+            List<BranchFileAssociation> associations = Optional.ofNullable(pkg.getFileAssociations()).orElse(Collections.emptyList());
+
+            for (BranchFileAssociation assoc : associations) {
+                FileData file = assoc.getFile();
+                if (file == null) continue;
+
+                totalFiles++;
+                List<ClassData> classes = Optional.ofNullable(file.getClasses()).orElse(Collections.emptyList());
+                totalClasses += classes.size();
+
+                for (ClassData cls : classes) {
+                    totalMethods += Optional.ofNullable(cls.getMethods()).orElse(Collections.emptyList()).size();
+                    totalFields += Optional.ofNullable(cls.getFields()).orElse(Collections.emptyList()).size();
+                }
+            }
+        }
+
+        StatisticsDTO stats = new StatisticsDTO();
+        stats.setTotalPackages(allPackages.size());
+        stats.setTotalFiles(totalFiles);
+        stats.setTotalClasses(totalClasses);
+        stats.setTotalMethods(totalMethods);
+        stats.setTotalFields(totalFields);
+        log.info("📊 Computed Statistics: packages={}, files={}, classes={}, methods={}, fields={}",
+                allPackages.size(), totalFiles, totalClasses, totalMethods, totalFields);
+        return stats;
+    }
+
 }
