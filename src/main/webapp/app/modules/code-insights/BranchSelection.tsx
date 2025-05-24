@@ -18,7 +18,12 @@ const BranchSelection = ({ repo }: { repo: string }) => {
   const handleGenerate = () => {
     setLoading(true);
     axios
-      .get('/api/documentation/generate', { repo, branch: selectedBranch })
+      .get('/api/documentation/generate', {
+        params: {
+          repoName: repo,
+          branchName: selectedBranch,
+        },
+      })
       .then(res => {
         setDocData(res.data);
         setLoading(false);
