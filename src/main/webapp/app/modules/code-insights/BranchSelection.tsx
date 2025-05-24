@@ -18,7 +18,7 @@ const BranchSelection = ({ repo }: { repo: string }) => {
   const handleGenerate = () => {
     setLoading(true);
     axios
-      .post('/api/docs/generate', { repo, branch: selectedBranch })
+      .post('/api/documentation/generate', { repo, branch: selectedBranch })
       .then(res => {
         setDocData(res.data);
         setLoading(false);

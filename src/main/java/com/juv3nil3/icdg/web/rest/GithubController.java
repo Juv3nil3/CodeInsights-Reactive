@@ -2,6 +2,7 @@ package com.juv3nil3.icdg.web.rest;
 
 
 import com.juv3nil3.icdg.service.GithubTokenService;
+import com.juv3nil3.icdg.service.KeycloakTokenService;
 import com.juv3nil3.icdg.service.dto.GitHubRepoPojo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,20 +28,20 @@ public class GithubController {
 
     private final GithubTokenService githubTokenService;
 
-    @Autowired
-    private ReactiveOAuth2AuthorizedClientService clientService;
+    private final KeycloakTokenService keycloakTokenService;
     private static final Logger log = LoggerFactory.getLogger(GithubController.class);
 
 
     public GithubController(WebClient.Builder webClientBuilder,
-                            @Value("${github.api.base-url:https://api.github.com}") String githubApiBaseUrl, GithubTokenService githubTokenService) {
+                            @Value("${github.api.base-url:https://api.github.com}") String githubApiBaseUrl, GithubTokenService githubTokenService, KeycloakTokenService keycloakTokenService) {
         this.githubTokenService = githubTokenService;
+        this.keycloakTokenService = keycloakTokenService;
         this.webClient = webClientBuilder.baseUrl(githubApiBaseUrl).build();
     }
 
     @GetMapping("/repos")
     public Mono<List<String>> getJavaRepositories() {
-        return getAccessToken()
+        return keycloakTokenService.getAccessToken()
                 .doOnNext(keycloakToken -> log.info("🔑 Keycloak Access Token: {}", keycloakToken))
                 .flatMapMany(keycloakToken ->
                         githubTokenService.fetchGithubTokenFromKeycloak(keycloakToken)
@@ -69,7 +70,7 @@ public class GithubController {
 
     @GetMapping("/repos/{repo}/branches")
     public Mono<List<String>> getBranches(@PathVariable String repo) {
-        return getAccessToken()
+        return keycloakTokenService.getAccessToken()
                 .doOnNext(keycloakToken -> log.info("🔑 Keycloak Access Token: {}", keycloakToken))
                 .flatMap(keycloakToken ->
                         githubTokenService.fetchGithubTokenFromKeycloak(keycloakToken)
@@ -120,33 +121,4 @@ public class GithubController {
             this.name = name;
         }
     }
-
-    @GetMapping("/token")
-    public Mono<String> token() {
-        return getAccessToken()
-                .doOnNext(token -> log.info("Retrieved Access Token: {}", token))
-                .map(token -> "Bearer " + token);
-    }
-
-
-
-    public Mono<String> getAccessToken() {
-        return ReactiveSecurityContextHolder.getContext()
-                .map(SecurityContext::getAuthentication)
-                .cast(OAuth2AuthenticationToken.class)
-                .flatMap(auth ->
-                        clientService.loadAuthorizedClient(
-                                auth.getAuthorizedClientRegistrationId(),
-                                auth.getName()
-                        )
-                )
-                .cast(OAuth2AuthorizedClient.class)
-                .map(client -> client.getAccessToken().getTokenValue());
-    }
-
-
-
-
-
-
 }
