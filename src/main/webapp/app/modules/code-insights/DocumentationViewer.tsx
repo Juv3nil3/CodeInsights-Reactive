@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DependencyGraphViewer from './DependencyGraphViewer'
 
 const ToggleSection = ({ title, children, defaultExpanded = true }: any) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -123,6 +124,10 @@ const DocumentationViewer = ({ data }: { data: any }) => {
             <h4 className="text-primary">📂 Packages</h4>
             {renderPackages(data.packages)}
           </div>
+          {data.dependencyGraph?.nodes?.length > 0 && (
+            <DependencyGraphViewer graphData={data.dependencyGraph} />
+          )}
+
         </div>
       </div>
     );
