@@ -172,9 +172,11 @@ public class StructureParserService {
                     .switchIfEmpty(
                             javaFileParserService.parseJavaFile(new ByteArrayInputStream(fileBytes))
                                     .flatMap(parsedFile -> {
+                                        parsedFile.setFileName(relativePath);
                                         parsedFile.setRepoName(repoName);
                                         parsedFile.setFilePath(relativePath);
                                         parsedFile.setContentHash(contentHash);
+                                        parsedFile.setImportsJson(parsedFile.toJson(parsedFile.getImports()));
                                         return saveFileData(parsedFile); // ↓ will propagate UUID
                                     })
                     )

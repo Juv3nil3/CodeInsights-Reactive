@@ -184,6 +184,7 @@ public class DocumentationGenerationService {
                         .collectList()
                         .map(classList -> {
                             file.setClasses(classList);
+                            file.setImports(file.fromJson(file.getImportsJson()));
                             return file;
                         }));
     }

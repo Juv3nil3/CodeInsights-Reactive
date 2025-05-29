@@ -15,6 +15,7 @@ public class DocumentationDTO {
     private LocalDateTime updatedAt;
     private List<PackageDTO> packages;
     private StatisticsDTO statistics;
+    private DependencyGraphDTO dependencyGraph;
 
     public List<PackageDTO> getPackages() {
         return packages;
@@ -78,5 +79,13 @@ public class DocumentationDTO {
 
     public void setStatistics(StatisticsDTO statistics) {
         this.statistics = statistics;
+    }
+
+    public DependencyGraphDTO getDependencyGraph() {
+        return dependencyGraph;
+    }
+
+    public void setDependencyGraph(DependencyGraphDTO dependencyGraph) {
+        this.dependencyGraph = dependencyGraph;
     }
 }

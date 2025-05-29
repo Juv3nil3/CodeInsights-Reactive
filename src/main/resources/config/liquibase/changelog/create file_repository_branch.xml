@@ -42,6 +42,7 @@
             <column name="repo_name" type="VARCHAR(255)"/>
             <column name="file_path" type="VARCHAR(1024)"/>
             <column name="content_hash" type="VARCHAR(255)"/>
+            <column name="imports_json" type="VARCHAR(1024)"/>
         </createTable>
 
         <!-- PACKAGE -->

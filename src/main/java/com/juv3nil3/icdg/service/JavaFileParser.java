@@ -4,6 +4,7 @@ package com.juv3nil3.icdg.service;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -35,6 +36,7 @@ public class JavaFileParser {
                 CompilationUnit compilationUnit = parseCompilationUnit(inputStream);
 
                 extractClassData(compilationUnit, fileData);
+                extractImports(compilationUnit, fileData);
 
                 System.out.println("Java file parsing completed.");
                 return fileData;
@@ -43,9 +45,9 @@ public class JavaFileParser {
                 System.err.println("Error during Java file parsing: " + e.getMessage());
                 throw new RuntimeException("Parsing failed", e);
             }
-
         });
     }
+
 
 
     private CompilationUnit parseCompilationUnit(InputStream inputStream) throws Exception {
@@ -144,6 +146,25 @@ public class JavaFileParser {
         annotation.setAnnotation(expr.getNameAsString());
         return annotation;
     }
+
+    private void extractImports(CompilationUnit compilationUnit, FileData fileData) {
+        List<String> projectImports = compilationUnit.getImports().stream()
+                .map(ImportDeclaration::getNameAsString)
+                .filter(importStr ->
+                        !importStr.startsWith("java.") &&
+                                !importStr.startsWith("javax.") &&
+                                !importStr.startsWith("com.google") &&
+                                !importStr.startsWith("jakarta.") &&
+                                !importStr.startsWith("org.springframework.") &&
+                                !importStr.startsWith("com.fasterxml.") &&
+                                !importStr.startsWith("lombok."))
+                .distinct()
+                .collect(Collectors.toList());
+
+        fileData.setImports(projectImports); // this also sets importsJson
+    }
+
+
 
 }
 

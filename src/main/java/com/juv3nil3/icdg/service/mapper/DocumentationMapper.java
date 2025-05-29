@@ -2,9 +2,11 @@ package com.juv3nil3.icdg.service.mapper;
 
 
 import com.juv3nil3.icdg.domain.*;
+import com.juv3nil3.icdg.service.DependencyGraphBuilder;
 import com.juv3nil3.icdg.service.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -14,6 +16,9 @@ import java.util.stream.Collectors;
 public class DocumentationMapper {
 
     private static Logger log = LoggerFactory.getLogger(DocumentationMapper.class);
+
+    @Autowired
+    private DependencyGraphBuilder dependencyGraphBuilder;
 
     public DocumentationDTO toDto(Documentation documentation) {
         if (documentation == null) {
@@ -50,6 +55,19 @@ public class DocumentationMapper {
         // 🔢 Compute statistics
         StatisticsDTO stats = computeStatistics(allPackages);
         dto.setStatistics(stats);
+
+        // ✅ Extract all files from all packages through file associations
+        List<FileData> allFiles = allPackages.stream()
+                .flatMap(pkg -> Optional.ofNullable(pkg.getFileAssociations()).orElse(List.of()).stream())
+                .map(BranchFileAssociation::getFile)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        // ✅ Build and map the dependency graph
+        Map<FileData, Set<FileData>> dependencyGraph = dependencyGraphBuilder.buildDependencyGraph(allFiles);
+        DependencyGraphDTO graphDto = mapToDependencyGraph(dependencyGraph);
+        dto.setDependencyGraph(graphDto);
 
         log.info("✅ Mapped documentation DTO with {} root packages", rootPackages.size());
         return dto;
@@ -176,5 +194,44 @@ public class DocumentationMapper {
                 allPackages.size(), totalFiles, totalClasses, totalMethods, totalFields);
         return stats;
     }
+
+    public DependencyGraphDTO mapToDependencyGraph(Map<FileData, Set<FileData>> graph) {
+        DependencyGraphDTO dto = new DependencyGraphDTO();
+
+        List<DependencyGraphDTO.Node> nodes = new ArrayList<>();
+        List<DependencyGraphDTO.Edge> edges = new ArrayList<>();
+
+        Map<FileData, String> fileToIdMap = new HashMap<>();
+
+        // Generate unique IDs and nodes
+        for (FileData file : graph.keySet()) {
+            String id = file.getId().toString(); // or use filePath
+            fileToIdMap.put(file, id);
+
+            DependencyGraphDTO.Node node = new DependencyGraphDTO.Node();
+            node.setId(id);
+            node.setLabel(file.getFilePath());
+            nodes.add(node);
+        }
+
+        // Build edges
+        for (Map.Entry<FileData, Set<FileData>> entry : graph.entrySet()) {
+            String sourceId = fileToIdMap.get(entry.getKey());
+            for (FileData targetFile : entry.getValue()) {
+                String targetId = fileToIdMap.get(targetFile);
+                if (targetId != null) {
+                    DependencyGraphDTO.Edge edge = new DependencyGraphDTO.Edge();
+                    edge.setSource(sourceId);
+                    edge.setTarget(targetId);
+                    edges.add(edge);
+                }
+            }
+        }
+
+        dto.setNodes(nodes);
+        dto.setEdges(edges);
+        return dto;
+    }
+
 
 }

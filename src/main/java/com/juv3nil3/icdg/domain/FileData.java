@@ -1,9 +1,13 @@
 package com.juv3nil3.icdg.domain;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.Id;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +25,11 @@ public class FileData {
 
     private String contentHash;
 
+    private String importsJson; // Persisted as JSON string
+
+    @org.springframework.data.annotation.Transient
+    private List<String> imports = new ArrayList<>();
+
     @org.springframework.data.annotation.Transient
     private List<ClassData> classes = new ArrayList<>();
 
@@ -34,6 +43,35 @@ public class FileData {
         classes.remove(classData);
         classData.setFileData(null);
     }
+
+    public void setImports(List<String> imports) {
+        this.imports = imports;
+        this.importsJson = toJson(imports);
+    }
+
+    public List<String> getImports() {
+        if (imports == null && importsJson != null) {
+            this.imports = fromJson(importsJson);
+        }
+        return imports;
+    }
+
+    public String toJson(List<String> list) {
+        try {
+            return new ObjectMapper().writeValueAsString(list);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize imports", e);
+        }
+    }
+
+    public List<String> fromJson(String json) {
+        try {
+            return new ObjectMapper().readValue(json, new TypeReference<List<String>>() {});
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to deserialize importsJson", e);
+        }
+    }
+
 
     // Getters and Setters
 
@@ -84,6 +122,14 @@ public class FileData {
 
     public void setClasses(List<ClassData> classes) {
         this.classes = classes;
+    }
+
+    public String getImportsJson() {
+        return importsJson;
+    }
+
+    public void setImportsJson(String importsJson) {
+        this.importsJson = importsJson;
     }
 }
 

@@ -66,6 +66,27 @@ public class DocumentationController {
                 .map(documentationMapper::toDto);
     }
 
+//    @GetMapping("/graph")
+//    public Mono<List<GraphEdgeDTO>> getDependencyGraph(
+//            @RequestParam UUID documentationId
+//    ) {
+//        return documentationService.fetchFullDocumentation(documentationId)
+//                .map(doc -> {
+//                    List<FileData> allFiles = doc.getPackages().stream()
+//                            .flatMap(pkg -> Optional.ofNullable(pkg.getFileAssociations()).orElse(List.of()).stream())
+//                            .map(BranchFileAssociation::getFile)
+//                            .filter(Objects::nonNull)
+//                            .distinct()
+//                            .toList();
+//
+//                    return graphService.buildDependencyGraph(allFiles).entrySet().stream()
+//                            .flatMap(entry -> entry.getValue().stream().map(dep ->
+//                                    new GraphEdgeDTO(entry.getKey().getFilePath(), dep.getFilePath())))
+//                            .toList();
+//                });
+//    }
+
+
 
 
 
