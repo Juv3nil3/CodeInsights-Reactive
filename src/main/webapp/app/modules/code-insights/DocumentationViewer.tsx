@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DependencyGraphViewer from './DependencyGraphViewer'
+import DependencyGraphViewer from './DependencyGraphViewer';
 
 const ToggleSection = ({ title, children, defaultExpanded = true }: any) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -35,7 +35,27 @@ const DocumentationStats = ({ stats }: { stats: any }) => {
 };
 
 const DocumentationViewer = ({ data }: { data: any }) => {
-  if (!data) return null;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(`/api/documentation/search/class?className=${encodeURIComponent(searchQuery)}`);
+      const results = await response.json();
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Search failed:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   const renderComment = (comment: string | null) => {
     if (!comment) return null;
@@ -105,32 +125,84 @@ const DocumentationViewer = ({ data }: { data: any }) => {
     ));
   };
 
-  return (
-      <div className="d-flex gap-4 p-4" style={{ backgroundColor: '#1e1e1e', color: '#ffffff' }}>
-        {/* Sidebar: Statistics */}
-        <DocumentationStats stats={data.statistics} />
-
-        {/* Main Content: Documentation Tree */}
-        <div className="flex-grow-1">
-          <h2 className="mb-3 text-success">📙 {data.repoName}</h2>
-          <p>
-            <strong>Owner:</strong> {data.owner} | <strong>Branch:</strong> {data.branchName}
-          </p>
-          <p className="text-muted">
-            Created: {new Date(data.createdAt).toLocaleString()} | Updated: {new Date(data.updatedAt).toLocaleString()}
-          </p>
-
-          <div className="mt-4">
-            <h4 className="text-primary">📂 Packages</h4>
-            {renderPackages(data.packages)}
+  const renderSearchResults = () => {
+    if (!Array.isArray(searchResults) || searchResults.length === 0) return null;
+    return (
+      <div className="mt-4">
+        <h5 className="text-primary">🔎 Search Results:</h5>
+        {searchResults.map((doc, index) => (
+          <div key={index} className="mb-3 p-2 bg-dark text-light rounded">
+            <h6>📙 {doc.exportPath || 'Unnamed Documentation'}</h6>
+            {doc.packages?.map((pkg: any, pkgIndex: number) => (
+              <div key={pkgIndex} className="ms-3">
+                📦 <strong>{pkg.packageName}</strong>
+                {pkg.files?.map((file: any, fileIndex: number) => (
+                  <div key={fileIndex} className="ms-3">
+                    📄 {file.filePath}
+                    {file.classes?.map((cls: any, clsIndex: number) => (
+                      <div key={clsIndex} className="ms-3">
+                        📘 <strong>{cls.className}</strong>
+                        <div className="small">{cls.comment}</div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
-          {data.dependencyGraph?.nodes?.length > 0 && (
-            <DependencyGraphViewer graphData={data.dependencyGraph} />
-          )}
-
-        </div>
+        ))}
       </div>
     );
   };
+
+
+  if (!data) return null;
+
+  return (
+    <div className="d-flex gap-4 p-4" style={{ backgroundColor: '#1e1e1e', color: '#ffffff' }}>
+      {/* Sidebar: Statistics */}
+      <DocumentationStats stats={data.statistics} />
+
+      {/* Main Content: Documentation Tree */}
+      <div className="flex-grow-1">
+        <h2 className="mb-3 text-success">📙 {data.repoName}</h2>
+        <p>
+          <strong>Owner:</strong> {data.owner} | <strong>Branch:</strong> {data.branchName}
+        </p>
+        <p className="text-muted">
+          Created: {new Date(data.createdAt).toLocaleString()} | Updated: {new Date(data.updatedAt).toLocaleString()}
+        </p>
+
+        {/* Search Bar */}
+        <div className="mb-3">
+          <input
+            type="text"
+            placeholder="🔍 Search by class name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={(e) => { if (e.key === 'Enter') handleSearch(); }}
+            className="form-control"
+            style={{ maxWidth: '400px', display: 'inline-block', marginRight: '10px' }}
+          />
+          <button className="btn btn-primary" onClick={handleSearch} disabled={isSearching}>
+            {isSearching ? 'Searching...' : 'Search'}
+          </button>
+        </div>
+
+        {renderSearchResults()}
+
+        {/* Documentation Tree */}
+        <div className="mt-4">
+          <h4 className="text-primary">📂 Packages</h4>
+          {renderPackages(data.packages)}
+        </div>
+
+        {data.dependencyGraph?.nodes?.length > 0 && (
+          <DependencyGraphViewer graphData={data.dependencyGraph} />
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default DocumentationViewer;

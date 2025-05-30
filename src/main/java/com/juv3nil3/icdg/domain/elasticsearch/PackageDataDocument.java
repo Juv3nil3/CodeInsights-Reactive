@@ -1,12 +1,14 @@
 package com.juv3nil3.icdg.domain.elasticsearch;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.List;
 
-@Builder
 public class PackageDataDocument {
 
     private String packageName;
@@ -24,7 +26,6 @@ public class PackageDataDocument {
 
     // Getters and Setters
 
-
     public String getPackageName() {
         return packageName;
     }
@@ -39,5 +40,29 @@ public class PackageDataDocument {
 
     public void setFiles(List<FileDataDocument> files) {
         this.files = files;
+    }
+
+    // Manual builder implementation
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private String packageName;
+        private List<FileDataDocument> files;
+
+        public Builder packageName(String packageName) {
+            this.packageName = packageName;
+            return this;
+        }
+
+        public Builder files(List<FileDataDocument> files) {
+            this.files = files;
+            return this;
+        }
+
+        public PackageDataDocument build() {
+            return new PackageDataDocument(packageName, files);
+        }
     }
 }

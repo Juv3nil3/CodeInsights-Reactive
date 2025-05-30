@@ -2,6 +2,7 @@ package com.juv3nil3.icdg.domain.elasticsearch;
 
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -16,17 +17,23 @@ public class DocumentationDocument {
 
     @Id
     private String id;
-
     private UUID branchMetadataId;
     private String exportPath;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     @Field(type = FieldType.Nested)
     private List<PackageDataDocument> packages;
 
-    // Getters and Setters
+    // Constructors
+    public DocumentationDocument() {}
 
+    public DocumentationDocument(String id, UUID branchMetadataId, String exportPath, LocalDateTime createdAt, LocalDateTime updatedAt, List<PackageDataDocument> packages) {
+        this.id = id;
+        this.branchMetadataId = branchMetadataId;
+        this.exportPath = exportPath;
+        this.packages = packages;
+    }
+
+    // Getters and Setters
     public String getId() {
         return id;
     }
@@ -49,22 +56,6 @@ public class DocumentationDocument {
 
     public void setExportPath(String exportPath) {
         this.exportPath = exportPath;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public List<PackageDataDocument> getPackages() {

@@ -1,5 +1,6 @@
 package com.juv3nil3.icdg.web.rest;
 
+import com.juv3nil3.icdg.domain.elasticsearch.ClassDataDocument;
 import com.juv3nil3.icdg.domain.elasticsearch.DocumentationDocument;
 import com.juv3nil3.icdg.repository.elasticsearch.DocumentationSearchRepo;
 import com.juv3nil3.icdg.service.*;
@@ -68,35 +69,15 @@ public class DocumentationController {
                 .map(documentationMapper::toDto);
     }
 
+
+
     @GetMapping("/search/class")
-    public ResponseEntity<List<DocumentationDocument>> searchByClassName(@RequestParam String className) {
-        List<DocumentationDocument> results = searchService.searchByClassName(className);
-        return ResponseEntity.ok(results);
+    public Mono<ResponseEntity<List<DocumentationDocument>>> searchByClassName(@RequestParam String className) {
+        return Mono.fromCallable(() -> {
+            List<DocumentationDocument> result = searchService.searchByClassName(className);
+            return ResponseEntity.ok(result);
+        });
     }
-
-//    @GetMapping("/graph")
-//    public Mono<List<GraphEdgeDTO>> getDependencyGraph(
-//            @RequestParam UUID documentationId
-//    ) {
-//        return documentationService.fetchFullDocumentation(documentationId)
-//                .map(doc -> {
-//                    List<FileData> allFiles = doc.getPackages().stream()
-//                            .flatMap(pkg -> Optional.ofNullable(pkg.getFileAssociations()).orElse(List.of()).stream())
-//                            .map(BranchFileAssociation::getFile)
-//                            .filter(Objects::nonNull)
-//                            .distinct()
-//                            .toList();
-//
-//                    return graphService.buildDependencyGraph(allFiles).entrySet().stream()
-//                            .flatMap(entry -> entry.getValue().stream().map(dep ->
-//                                    new GraphEdgeDTO(entry.getKey().getFilePath(), dep.getFilePath())))
-//                            .toList();
-//                });
-//    }
-
-
-
-
 
 
 }
