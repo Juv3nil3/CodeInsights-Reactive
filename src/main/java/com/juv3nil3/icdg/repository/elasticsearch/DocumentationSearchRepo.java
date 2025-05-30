@@ -14,6 +14,20 @@ public interface DocumentationSearchRepo extends ElasticsearchRepository<Documen
 
     List<DocumentationDocument> findByPackagesFilesClassesClassName(String className);
 
+    @Query("""
+        {
+          "nested": {
+            "path": "packages.files.classes",
+            "query": {
+              "match": {
+                "packages.files.classes.className": "?0"
+              }
+            }
+          }
+        }
+    """)
+    List<DocumentationDocument> findByClassName(String className);
+
 
 
 }

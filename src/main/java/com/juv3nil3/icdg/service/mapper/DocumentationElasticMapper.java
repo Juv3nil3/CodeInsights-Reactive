@@ -1,9 +1,6 @@
 package com.juv3nil3.icdg.service.mapper;
 
-import com.juv3nil3.icdg.domain.ClassData;
-import com.juv3nil3.icdg.domain.Documentation;
-import com.juv3nil3.icdg.domain.FileData;
-import com.juv3nil3.icdg.domain.PackageData;
+import com.juv3nil3.icdg.domain.*;
 import com.juv3nil3.icdg.domain.elasticsearch.ClassDataDocument;
 import com.juv3nil3.icdg.domain.elasticsearch.DocumentationDocument;
 import com.juv3nil3.icdg.domain.elasticsearch.FileDataDocument;
@@ -11,6 +8,10 @@ import com.juv3nil3.icdg.domain.elasticsearch.PackageDataDocument;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface DocumentationElasticMapper {
@@ -25,7 +26,19 @@ public interface DocumentationElasticMapper {
     @Mapping(source = "packages", target = "packages")
     DocumentationDocument toDocument(Documentation documentation);
 
-    PackageDataDocument toDocument(PackageData packageData);
+    default PackageDataDocument toDocument(PackageData packageData) {
+        List<FileDataDocument> fileDocs = packageData.getFileAssociations().stream()
+                .map(BranchFileAssociation::getFile)
+                .filter(Objects::nonNull)
+                .map(this::toDocument)
+                .collect(Collectors.toList());
+
+        return PackageDataDocument.builder()
+                .packageName(packageData.getPackageName())
+                .files(fileDocs)
+                .build();
+    }
+
 
     @Mapping(source = "filePath", target = "filePath")
     @Mapping(source = "classes", target = "classes")

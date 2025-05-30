@@ -2,10 +2,7 @@ package com.juv3nil3.icdg.web.rest;
 
 import com.juv3nil3.icdg.domain.elasticsearch.DocumentationDocument;
 import com.juv3nil3.icdg.repository.elasticsearch.DocumentationSearchRepo;
-import com.juv3nil3.icdg.service.DocumentationGenerationService;
-import com.juv3nil3.icdg.service.GitMetadataExtractor;
-import com.juv3nil3.icdg.service.GithubTokenService;
-import com.juv3nil3.icdg.service.KeycloakTokenService;
+import com.juv3nil3.icdg.service.*;
 import com.juv3nil3.icdg.service.dto.DocumentationDTO;
 import com.juv3nil3.icdg.service.mapper.DocumentationElasticMapper;
 import com.juv3nil3.icdg.service.mapper.DocumentationMapper;
@@ -13,9 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/documentation")
@@ -28,11 +28,12 @@ public class DocumentationController {
     private final DocumentationSearchRepo documentationSearchRepo;
     private final KeycloakTokenService keycloakTokenService;
     private final GitMetadataExtractor gitMetadataExtractor;
+    private final DocumentationSearchService searchService;
 
     private static Logger log = LoggerFactory.getLogger(DocumentationController.class);
 
     @Autowired
-    public DocumentationController(DocumentationGenerationService documentationService, DocumentationMapper documentationMapper, GithubTokenService githubTokenService, DocumentationElasticMapper documentationElasticMapper, DocumentationSearchRepo documentationSearchRepo, KeycloakTokenService keycloakTokenService, GitMetadataExtractor gitMetadataExtractor) {
+    public DocumentationController(DocumentationGenerationService documentationService, DocumentationMapper documentationMapper, GithubTokenService githubTokenService, DocumentationElasticMapper documentationElasticMapper, DocumentationSearchRepo documentationSearchRepo, KeycloakTokenService keycloakTokenService, GitMetadataExtractor gitMetadataExtractor, DocumentationSearchService searchService) {
         this.documentationService = documentationService;
         this.documentationMapper = documentationMapper;
         this.githubTokenService = githubTokenService;
@@ -40,6 +41,7 @@ public class DocumentationController {
         this.documentationSearchRepo = documentationSearchRepo;
         this.keycloakTokenService = keycloakTokenService;
         this.gitMetadataExtractor = gitMetadataExtractor;
+        this.searchService = searchService;
     }
 
     @GetMapping("/generate")
@@ -64,6 +66,12 @@ public class DocumentationController {
                                 )
                 )
                 .map(documentationMapper::toDto);
+    }
+
+    @GetMapping("/search/class")
+    public ResponseEntity<List<DocumentationDocument>> searchByClassName(@RequestParam String className) {
+        List<DocumentationDocument> results = searchService.searchByClassName(className);
+        return ResponseEntity.ok(results);
     }
 
 //    @GetMapping("/graph")
