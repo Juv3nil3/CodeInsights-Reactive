@@ -17,6 +17,7 @@ public class DocumentationDocument {
 
     @Id
     private String id;
+    private String documentationName;
     private UUID branchMetadataId;
     private String exportPath;
 
@@ -26,8 +27,9 @@ public class DocumentationDocument {
     // Constructors
     public DocumentationDocument() {}
 
-    public DocumentationDocument(String id, UUID branchMetadataId, String exportPath, LocalDateTime createdAt, LocalDateTime updatedAt, List<PackageDataDocument> packages) {
+    public DocumentationDocument(String id,String documentationName, UUID branchMetadataId, String exportPath, LocalDateTime createdAt, LocalDateTime updatedAt, List<PackageDataDocument> packages) {
         this.id = id;
+        this.documentationName = documentationName;
         this.branchMetadataId = branchMetadataId;
         this.exportPath = exportPath;
         this.packages = packages;
@@ -40,6 +42,14 @@ public class DocumentationDocument {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getDocumentationName() {
+        return documentationName;
+    }
+
+    public void setDocumentationName(String documentationName) {
+        this.documentationName = documentationName;
     }
 
     public UUID getBranchMetadataId() {

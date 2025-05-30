@@ -33,6 +33,9 @@ public class DocumentationBuilderService {
 
     public Mono<Documentation> buildDocumentation(RepositoryMetadata repo, BranchMetadata branchMetadata) {
         Documentation documentation = new Documentation();
+        String repoName = repo.getRepoName() != null ? repo.getRepoName() : "";
+        String branchName = branchMetadata.getBranchName() != null ? branchMetadata.getBranchName() : "";
+        documentation.setDocumentationName(repoName + branchName);
         documentation.setBranchMetadataId(branchMetadata.getId());
         documentation.setCreatedAt(LocalDateTime.now());
         documentation.setUpdatedAt(LocalDateTime.now());

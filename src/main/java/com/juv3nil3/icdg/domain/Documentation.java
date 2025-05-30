@@ -14,7 +14,7 @@ public class Documentation {
     @Id
     private UUID id;
 
-
+    private String documentationName;
     private UUID branchMetadataId;
 
     private String exportPath;
@@ -36,6 +36,14 @@ public class Documentation {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getDocumentationName() {
+        return documentationName;
+    }
+
+    public void setDocumentationName(String documentationName) {
+        this.documentationName = documentationName;
     }
 
     public UUID getBranchMetadataId() {

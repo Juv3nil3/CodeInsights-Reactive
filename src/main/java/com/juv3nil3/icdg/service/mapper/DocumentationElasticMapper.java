@@ -23,6 +23,7 @@ public interface DocumentationElasticMapper {
     DocumentationElasticMapper INSTANCE = Mappers.getMapper(DocumentationElasticMapper.class);
 
     @Mapping(target = "id", expression = "java(documentation.getId().toString())")
+    @Mapping(source = "documentationName", target = "documentationName")
     @Mapping(source = "branchMetadataId", target = "branchMetadataId")
     @Mapping(source = "exportPath", target = "exportPath")
     @Mapping(source = "packages", target = "packages")

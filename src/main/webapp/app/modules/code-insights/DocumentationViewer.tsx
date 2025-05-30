@@ -18,6 +18,29 @@ const ToggleSection = ({ title, children, defaultExpanded = true }: any) => {
   );
 };
 
+const filterClassesInDocument = (document, searchClassName) => {
+  const filteredPackages = document.packages
+    ?.map(pkg => {
+      const filteredFiles = pkg.files
+        ?.map(file => {
+          const filteredClasses = file.classes
+            ?.filter(cls => cls.className === searchClassName);
+          return (filteredClasses && filteredClasses.length > 0)
+            ? { ...file, classes: filteredClasses }
+            : null;
+        })
+        ?.filter(file => file !== null);
+
+      return (filteredFiles && filteredFiles.length > 0)
+        ? { ...pkg, files: filteredFiles }
+        : null;
+    })
+    ?.filter(pkg => pkg !== null);
+
+  return { ...document, packages: filteredPackages };
+};
+
+
 const DocumentationStats = ({ stats }: { stats: any }) => {
   if (!stats) return null;
   return (
@@ -49,7 +72,11 @@ const DocumentationViewer = ({ data }: { data: any }) => {
     try {
       const response = await fetch(`/api/documentation/search/class?className=${encodeURIComponent(searchQuery)}`);
       const results = await response.json();
-      setSearchResults(results);
+
+      // Filter the classes on the frontend
+      const filteredResults = results.map(doc => filterClassesInDocument(doc, searchQuery));
+
+      setSearchResults(filteredResults);
     } catch (error) {
       console.error('Search failed:', error);
     } finally {
@@ -132,7 +159,7 @@ const DocumentationViewer = ({ data }: { data: any }) => {
         <h5 className="text-primary">🔎 Search Results:</h5>
         {searchResults.map((doc, index) => (
           <div key={index} className="mb-3 p-2 bg-dark text-light rounded">
-            <h6>📙 {doc.exportPath || 'Unnamed Documentation'}</h6>
+            <h6>📙 {doc.documentationName || 'Unnamed Documentation'}</h6>
             {doc.packages?.map((pkg: any, pkgIndex: number) => (
               <div key={pkgIndex} className="ms-3">
                 📦 <strong>{pkg.packageName}</strong>
