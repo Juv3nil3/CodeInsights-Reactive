@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -318,7 +319,7 @@ public class StructureParserService {
     private static final int ROOT_PACKAGE_DEPTH = 3; // e.g. com.example.MailAuditPro
 
     private static final String ROOT_PARENT_NAME = "ROOT";
-    private static final UUID ROOT_PARENT_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    //private static final UUID ROOT_PARENT_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
 
     private Mono<PackageData> getOrCreatePackage(String fullPackageName, RepositoryMetadata repo, BranchMetadata branch) {
@@ -366,8 +367,10 @@ public class StructureParserService {
 
 
     private Mono<PackageData> ensureRootParentPackage(BranchMetadata branch, String repoName) {
+        UUID rootParentId = UUID.nameUUIDFromBytes((repoName + "-root").getBytes(StandardCharsets.UTF_8));
+        String rootParentName = ROOT_PARENT_NAME + "-" + repoName;
         return packageRepository.insertRootPackage(
-                        ROOT_PARENT_ID,
+                        rootParentId,
                         ROOT_PARENT_NAME,
                         repoName,
                         branch.getId()
@@ -375,12 +378,12 @@ public class StructureParserService {
                 .onErrorResume(e -> {
                     // ignore duplicate key error if any slips through (just log)
                     if (e instanceof DuplicateKeyException) {
-                        log.info("Root package already exists: {}", ROOT_PARENT_ID);
+                        log.info("Root package already exists: {}", rootParentId);
                         return Mono.empty();
                     }
                     return Mono.error(e);
                 })
-                .then(packageRepository.findById(ROOT_PARENT_ID))
+                .then(packageRepository.findById(rootParentId))
                 .doOnNext(pkg -> log.info("📦 Ensured ROOT package: {}", pkg.getId()));
     }
 

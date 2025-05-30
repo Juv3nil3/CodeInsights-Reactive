@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import './home.scss';
 import RepoSelection from 'app/modules/code-insights/RepoSelection';
 

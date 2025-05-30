@@ -59,6 +59,9 @@ module.exports = async options =>
         },
       ],
       historyApiFallback: true,
+      client: {
+        overlay: false,
+      },
     },
     stats: process.env.JHI_DISABLE_WEBPACK_LOGS ? 'none' : options.stats,
     plugins: [

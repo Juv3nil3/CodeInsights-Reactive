@@ -3,6 +3,7 @@ package com.juv3nil3.icdg.service;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -51,7 +52,9 @@ public class JavaFileParser {
 
 
     private CompilationUnit parseCompilationUnit(InputStream inputStream) throws Exception {
-        JavaParser parser = new JavaParser();
+        ParserConfiguration configuration = new ParserConfiguration();
+        configuration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
+        JavaParser parser = new JavaParser(configuration);
         String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         ParseResult<CompilationUnit> parseResult = parser.parse(content);
         if (!parseResult.isSuccessful()) {
@@ -153,7 +156,9 @@ public class JavaFileParser {
                 .filter(importStr ->
                         !importStr.startsWith("java.") &&
                                 !importStr.startsWith("javax.") &&
+                                !importStr.startsWith("tech.jhipster") &&
                                 !importStr.startsWith("com.google") &&
+                                !importStr.startsWith("org.slf4j") &&
                                 !importStr.startsWith("jakarta.") &&
                                 !importStr.startsWith("org.springframework.") &&
                                 !importStr.startsWith("com.fasterxml.") &&

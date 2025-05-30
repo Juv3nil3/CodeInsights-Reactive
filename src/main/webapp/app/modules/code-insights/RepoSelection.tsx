@@ -18,7 +18,7 @@ const RepoSelection = () => {
 
   return (
     <div className="mt-4">
-      <h4>Select a Java Repository</h4>
+      <h4>Select Your Java Repository</h4>
       {loading && <Spinner />}
       {!loading && repos.length === 0 && <p>No repositories found</p>}
 

@@ -32,7 +32,6 @@ const BranchSelection = ({ repo }: { repo: string }) => {
 
   return (
     <div className="mt-4">
-      <h5>Branches of {repo}</h5>
       <FormGroup>
         <Label for="branchSelect">Branch</Label>
         <Input
