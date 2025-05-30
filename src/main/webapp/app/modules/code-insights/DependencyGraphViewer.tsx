@@ -45,7 +45,7 @@ const createLayoutedElements = (graphData: GraphData, direction: 'TB' | 'LR' = '
     const dagreNode = dagreGraph.node(node.id);
     return {
       id: node.id,
-      data: { label: node.label },
+      data: { label: node.label.split('/').pop() },
       position: { x: dagreNode.x - nodeWidth / 2, y: dagreNode.y - nodeHeight / 2 },
       style: {
         width: nodeWidth,
